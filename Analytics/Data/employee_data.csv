@@ -1,0 +1,11 @@
+EmployeeID,Name,Department,Gender,Age,Salary,Attendance,LeavesTaken,PerformanceRating,Experience
+101,Rahul,IT,Male,22,45000,96,2,4.5,1
+102,Binita,HR,Female,23,42000,94,3,4.2,2
+103,Aman,Finance,Male,28,65000,91,5,4.7,5
+104,Priya,IT,Female,25,55000,98,1,4.9,3
+105,Rohit,Sales,Male,30,50000,88,6,3.9,6
+106,Neha,Marketing,Female,27,47000,95,2,4.4,4
+107,Vikas,IT,Male,26,60000,92,4,4.6,4
+108,Anjali,HR,Female,24,43000,97,1,4.8,2
+109,Sumit,Finance,Male,29,70000,89,7,3.8,7
+110,Pooja,Marketing,Female,26,48000,96,2,4.5,3
