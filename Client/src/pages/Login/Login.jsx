@@ -1,64 +1,94 @@
+import { useState } from "react";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 import { FiEye } from "react-icons/fi";
+import Button from "../../components/common/Button";
 import illustration from "../../assets/images/login-illustration.png.png";
 function Login() {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="min-h-screen bg-slate-50 flex">
 
-      {/* Left Side */}
+  
       
-   <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-[#8B5CF6] via-[#6366F1] to-[#2563EB] text-white p-16 flex-col justify-between">
-   <div className="absolute -top-24 -left-24 w-72 h-72 bg-white/20 rounded-full blur-3xl"></div>
+   {/* Left Side */}
+<div className="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-[#8B5CF6] via-[#6366F1] to-[#2563EB] text-white p-16 flex-col justify-center gap-10">
 
-<div className="absolute -bottom-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-  <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
+  {/* Background Blur */}
+  <div className="absolute -top-24 -left-24 w-72 h-72 bg-white/20 rounded-full blur-3xl"></div>
 
-    <h1 className="text-5xl font-bold">
+  <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+
+  {/* Text */}
+  <div className="relative z-10">
+  <div className="flex items-center gap-3 mb-16">
+
+  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg">
+    <HiOutlineUserGroup className="text-indigo-600 text-3xl" />
+  </div>
+
+  <div>
+    <h2 className="text-3xl font-bold">
       CrewSync
+    </h2>
+
+    <p className="text-blue-100 text-sm">
+      HR Management System
+    </p>
+  </div>
+
+</div>
+    <h1 className="text-6xl font-bold leading-tight">
+      Sync your team.
+      <br />
+      <span className="text-blue-200">
+        Simplify HR.
+      </span>
     </h1>
 
-    <p className="mt-5 text-lg text-blue-100 leading-8">
-      Manage employees, attendance, payroll and HR operations
-      from one beautiful dashboard.
+    <p className="mt-8 text-xl text-blue-100 max-w-md leading-8">
+      CrewSync helps you manage your workforce
+      efficiently and effortlessly.
     </p>
 
-    <div className="mt-10 grid grid-cols-2 gap-4">
-
-      <div className="bg-white/10 rounded-2xl p-4">
-        <h2 className="text-3xl font-bold">250+</h2>
-        <p className="text-blue-100">Employees</p>
-      </div>
-
-      <div className="bg-white/10 rounded-2xl p-4">
-        <h2 className="text-3xl font-bold">98%</h2>
-        <p className="text-blue-100">Attendance</p>
-      </div>
-
-    </div>
-
   </div>
-  <div className="flex justify-center mt-10">
+
+  {/* Illustration */}
+ <div className="relative flex justify-center items-end flex-1">
+
+  {/* Top Left Card */}
+  <div className="absolute left-0 top-8 bg-white rounded-2xl shadow-xl px-5 py-4 z-20">
+    <p className="text-xs text-gray-500">Employees</p>
+    <h3 className="text-2xl font-bold text-gray-800">248+</h3>
+  </div>
+
+  {/* Top Right Card */}
+  <div className="absolute right-0 top-20 bg-white rounded-2xl shadow-xl px-5 py-4 z-20">
+    <p className="text-xs text-gray-500">Attendance</p>
+    <h3 className="text-2xl font-bold text-green-600">98%</h3>
+  </div>
+
+  {/* Main Illustration */}
   <img
     src={illustration}
     alt="CrewSync Illustration"
-    className="w-[430px] relative z-10"
+    className="w-[720px] object-contain relative z-10"
   />
+
 </div>
 
 </div>
 
       {/* Right Side */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-10">
 
-        <div className="bg-white w-full max-w-md rounded-3xl shadow-xl p-10">
+        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-gray-100 p-10">
            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
   <HiOutlineUserGroup className="text-white text-3xl" />
 </div>
 
-         <h2 className="text-3xl font-bold text-gray-900 mt-6">
+<h2 className="text-4xl font-bold text-gray-900 mt-6">
   Welcome Back 👋
 </h2>
-
 <p className="text-gray-500 mt-3 mb-8">
   Sign in to continue to CrewSync
 </p>
@@ -78,11 +108,18 @@ function Login() {
     Password
   </label>
 
+  <div className="relative">
   <input
-    type="password"
+   type={showPassword ? "text" : "password"}
     placeholder="Enter your password"
-    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
+
+ <FiEye
+  onClick={() => setShowPassword(!showPassword)}
+  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xl hover:text-indigo-600 transition"
+/>
+</div>
 </div>
 <div className="flex items-center justify-between mb-6">
 
@@ -103,7 +140,7 @@ function Login() {
 
 </div>
 <button
-  className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#6D5BFF] to-[#4F46E5] text-white font-semibold text-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
 >
   Sign In
 </button>
@@ -129,6 +166,15 @@ function Login() {
     Continue with Google
   </span>
 </button>
+<div className="mt-6 text-center text-sm text-gray-500">
+  Don't have an account?{" "}
+  <a
+    href="#"
+    className="text-blue-600 font-semibold hover:text-blue-700"
+  >
+    Sign Up
+  </a>
+</div>
         </div>
 
       </div>
