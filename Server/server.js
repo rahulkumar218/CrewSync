@@ -1,0 +1,22 @@
+const express = require("express");
+
+const app = express();
+
+// Import Employee Routes
+const employeeRoutes = require("./routes/employeeRoutes");
+
+app.use(express.json());
+
+// Home Route
+app.get("/", (req, res) => {
+    res.send("CrewSync Backend Running 🚀");
+});
+
+// Employee Routes
+app.use("/employees", employeeRoutes);
+
+const PORT = 5000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
