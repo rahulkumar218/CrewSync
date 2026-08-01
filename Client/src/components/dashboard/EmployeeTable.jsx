@@ -1,13 +1,34 @@
 function EmployeeTable() {
-  return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm mt-8">
+  const employees = [
+    {
+      name: "Binita Biswas",
+      email: "binita@crewsync.com",
+      department: "HR",
+      status: "Active",
+    },
+    {
+      name: "Rahul Sharma",
+      email: "rahul@crewsync.com",
+      department: "Engineering",
+      status: "On Leave",
+    },
+    {
+      name: "Priya Singh",
+      email: "priya@crewsync.com",
+      department: "Finance",
+      status: "Active",
+    },
+  ];
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold">
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-6">
+
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold">
           Recent Employees
         </h2>
 
-        <button className="text-violet-600 font-semibold">
+        <button className="text-violet-600 font-medium">
           View All
         </button>
       </div>
@@ -15,67 +36,62 @@ function EmployeeTable() {
       <table className="w-full">
 
         <thead>
-
-          <tr className="text-left border-b">
-
-            <th className="pb-3">Employee</th>
-            <th>Department</th>
-            <th>Role</th>
-            <th>Status</th>
-
+          <tr className="text-gray-500 border-b">
+            <th className="text-left pb-4">Employee</th>
+            <th className="text-left pb-4">Department</th>
+            <th className="text-left pb-4">Status</th>
           </tr>
-
         </thead>
 
         <tbody>
 
-          <tr className="border-b h-16">
+          {employees.map((emp, index) => (
 
-            <td>Binita Biswas</td>
-            <td>HR</td>
-            <td>HR Manager</td>
+            <tr key={index} className="border-b last:border-none">
 
-            <td>
+              <td className="py-4">
 
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                Active
-              </span>
+                <div className="flex items-center gap-3">
 
-            </td>
+                  <img
+                    src={`https://i.pravatar.cc/150?img=${index + 10}`}
+                    className="w-11 h-11 rounded-full"
+                    alt={emp.name}
+                  />
 
-          </tr>
+                  <div>
+                    <p className="font-medium">
+                      {emp.name}
+                    </p>
 
-          <tr className="border-b h-16">
+                    <p className="text-sm text-gray-500">
+                      {emp.email}
+                    </p>
+                  </div>
 
-            <td>Rahul Sharma</td>
-            <td>Engineering</td>
-            <td>Frontend Developer</td>
+                </div>
 
-            <td>
+              </td>
 
-              <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
-                On Leave
-              </span>
+              <td>{emp.department}</td>
 
-            </td>
+              <td>
 
-          </tr>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    emp.status === "Active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {emp.status}
+                </span>
 
-          <tr className="h-16">
+              </td>
 
-            <td>Priya Singh</td>
-            <td>Finance</td>
-            <td>Accountant</td>
+            </tr>
 
-            <td>
-
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                Active
-              </span>
-
-            </td>
-
-          </tr>
+          ))}
 
         </tbody>
 

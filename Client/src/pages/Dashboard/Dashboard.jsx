@@ -38,7 +38,7 @@ import BirthdayCard from "../../components/dashboard/BirthdayCard";
 import EmployeeTable from "../../components/dashboard/EmployeeTable";
 import AttendanceChart from "../../components/dashboard/AttendanceChart";
 import LeaveChart from "../../components/dashboard/LeaveChart";
-
+import QuickActions from "../../components/dashboard/QuickActions";
 function Dashboard() {
   return (
     <div className="flex">
@@ -52,26 +52,37 @@ function Dashboard() {
         <WelcomeBanner />
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
+        {/* Stats Section */}
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
+  {stats.map((item) => (
+    <StatCard key={item.id} data={item} />
+  ))}
+</div>
 
-          {stats.map((item) => (
-            <StatCard key={item.id} data={item} />
-          ))}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
+{/* Charts */}
+<div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mt-6">
 
-  <AttendanceChart />
+  <div className="xl:col-span-2">
+    <AttendanceChart />
+  </div>
 
   <LeaveChart />
- 
+
 </div>
-<EmployeeTable />
-<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
+
+{/* Bottom Section */}
+<div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mt-8">
+
+  <div className="xl:col-span-2">
+    <EmployeeTable />
+  </div>
+
   <UpcomingHolidays />
+
   <BirthdayCard />
-</div>
 
-        </div>
-
+</div> 
+  <QuickActions />
       </div>
 
     </div>
