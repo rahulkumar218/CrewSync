@@ -39,6 +39,7 @@ import EmployeeTable from "../../components/dashboard/EmployeeTable";
 import AttendanceChart from "../../components/dashboard/AttendanceChart";
 import LeaveChart from "../../components/dashboard/LeaveChart";
 import QuickActions from "../../components/dashboard/QuickActions";
+import Footer from "../../components/common/Footer";
 function Dashboard() {
   return (
     <div className="flex">
@@ -83,10 +84,12 @@ function Dashboard() {
 
 </div> 
   <QuickActions />
+  <Footer />
       </div>
 
     </div>
   );
 }
+
 
 export default Dashboard;

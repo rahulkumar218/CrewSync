@@ -1,0 +1,38 @@
+export const employees = [
+  {
+    id: 1,
+    name: "Binita Biswas",
+    email: "binita@crewsync.com",
+    department: "HR",
+    role: "HR Manager",
+    status: "Active",
+    avatar: "https://i.pravatar.cc/150?img=5",
+  },
+  {
+    id: 2,
+    name: "Rahul Sharma",
+    email: "rahul@crewsync.com",
+    department: "Engineering",
+    role: "Frontend Developer",
+    status: "On Leave",
+    avatar: "https://i.pravatar.cc/150?img=12",
+  },
+  {
+    id: 3,
+    name: "Priya Singh",
+    email: "priya@crewsync.com",
+    department: "Finance",
+    role: "Accountant",
+    status: "Active",
+    avatar: "https://i.pravatar.cc/150?img=32",
+  },
+  {
+    id: 4,
+    name: "Aman Gupta",
+    email: "aman@crewsync.com",
+    department: "Marketing",
+    role: "Marketing Executive",
+    status: "Inactive",
+    avatar: "https://i.pravatar.cc/150?img=15",
+  },
+];
