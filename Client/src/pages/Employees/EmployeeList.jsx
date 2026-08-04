@@ -1,5 +1,6 @@
 import Navbar from "../../components/dashboard/Navbar";
 import EmployeeTable from "../../components/employees/EmployeeTable";
+import employeeBanner from "../../assets/images/employee-banner.png";
 
 function EmployeeList() {
   return (
@@ -10,31 +11,64 @@ function EmployeeList() {
       <div className="mt-8">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div>
 
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Employees
-            </h1>
+          <div
+  className="relative overflow-hidden rounded-3xl h-[220px] flex items-center justify-between px-10"
+  style={{
+    backgroundImage: `linear-gradient(rgba(91,70,255,0.35),rgba(91,70,255,0.35)),url(${employeeBanner})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
 
-            <p className="text-slate-500 mt-2">
-              Manage all employees in your organization.
-            </p>
-          </div>
+  <div className="text-white max-w-xl">
 
-          <button className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-xl font-semibold transition">
-            + Add Employee
-          </button>
+    <h1 className="text-4xl font-bold">
+      Employees 👨‍💼
+    </h1>
 
+    <p className="mt-4 text-violet-100 text-lg">
+      Manage your workforce efficiently,
+      track departments and monitor employee activity.
+    </p>
+
+  </div>
+
+  <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-3xl px-8 py-6">
+
+    <h3 className="text-white text-lg">
+      Total Employees
+    </h3>
+
+    <h1 className="text-white text-5xl font-bold mt-2">
+      248
+    </h1>
+
+  </div>
+
+
+</div>
+         
         </div>
-<div className="mt-8 bg-white rounded-3xl shadow-sm p-6">
+<div className="mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6">
+  <div className="flex items-center justify-between mb-6">
 
-  <div className="flex flex-wrap gap-4 justify-between">
+  <h2 className="text-xl font-bold text-slate-800">
+    Employee Filters
+  </h2>
 
+  <button className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+    + Add Employee
+  </button>
+
+</div>
+
+ <div className="flex flex-wrap items-center gap-4">
     <input
       type="text"
       placeholder="🔍 Search Employee..."
-      className="w-80 px-5 py-3 rounded-xl border border-slate-200 outline-none focus:border-violet-500"
+      className="flex-1 min-w-[300px] px-5 py-3 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100 transition"
     />
 
     <div className="flex gap-4">
