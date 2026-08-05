@@ -1,10 +1,13 @@
 require("dotenv").config();
+
 const express = require("express");
 const db = require("./config/db");
+
 const app = express();
 
-// Import Employee Routes
+// Import Routes
 const employeeRoutes = require("./routes/employeeRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 app.use(express.json());
 
@@ -15,6 +18,9 @@ app.get("/", (req, res) => {
 
 // Employee Routes
 app.use("/employees", employeeRoutes);
+
+// Auth Routes
+app.use("/auth", authRoutes);
 
 const PORT = 5000;
 
