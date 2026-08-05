@@ -54,13 +54,21 @@ function EmployeeList() {
 <div className="mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6">
   <div className="flex items-center justify-between mb-6">
 
-  <h2 className="text-xl font-bold text-slate-800">
-    Employee Filters
-  </h2>
+    <div>
 
-  <button className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-xl font-semibold transition">
-    + Add Employee
-  </button>
+        <h2 className="text-xl font-bold text-slate-800">
+            Employee Directory
+        </h2>
+
+        <p className="text-slate-500 text-sm mt-1">
+            Search, filter and manage your workforce.
+        </p>
+
+    </div>
+
+    <button className="bg-violet-600 hover:bg-violet-700 transition text-white px-6 py-3 rounded-2xl font-semibold shadow-lg">
+        + Add Employee
+    </button>
 
 </div>
 
@@ -73,14 +81,14 @@ function EmployeeList() {
 
     <div className="flex gap-4">
 
-      <select className="px-5 py-3 rounded-xl border border-slate-200">
+      <select className="px-5 py-3rounded-2xl bg-slate-50 border border-slate-200">
         <option>All Departments</option>
         <option>HR</option>
         <option>IT</option>
         <option>Finance</option>
       </select>
 
-      <select className="px-5 py-3 rounded-xl border border-slate-200">
+      <select className="px-5 py-3 rounded-2xl bg-slate-50 border border-slate-200">
         <option>All Status</option>
         <option>Active</option>
         <option>On Leave</option>
