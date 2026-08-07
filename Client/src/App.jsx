@@ -19,17 +19,43 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import EmployeeList from "./pages/Employees/EmployeeList";
-
+import MainLayout from "./layouts/MainLayout";
+import Attendance from "./pages/Attendance/Attendance";
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
+        {/* Login - Sidebar nahi chahiye */}
         <Route path="/" element={<Login />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Dashboard */}
+        <Route
+          path="/dashboard"
+          element={
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          }
+        />
 
-        <Route path="/employees" element={<EmployeeList />} />
+        {/* Employees */}
+        <Route
+          path="/employees"
+          element={
+            <MainLayout>
+              <EmployeeList />
+            </MainLayout>
+          }
+        />
+        <Route
+  path="/attendance"
+  element={
+    <MainLayout>
+      <Attendance />
+    </MainLayout>
+  }
+/>
 
       </Routes>
     </BrowserRouter>

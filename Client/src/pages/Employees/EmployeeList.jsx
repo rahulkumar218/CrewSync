@@ -2,11 +2,12 @@ import Navbar from "../../components/dashboard/Navbar";
 import EmployeeTable from "../../components/employees/EmployeeTable";
 import employeeBanner from "../../assets/images/employee-banner.png";
 
+
 function EmployeeList() {
   return (
     <div className="flex-1 bg-slate-100 min-h-screen p-8">
 
-      <Navbar />
+    
 
       <div className="mt-8">
 

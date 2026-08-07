@@ -44,11 +44,11 @@ function Dashboard() {
   return (
     <div className="flex">
 
-      <Sidebar />
+      {/* <Sidebar /> */}
 
       <div className="flex-1 bg-slate-100 min-h-screen p-8">
 
-        <Navbar />
+        {/* <Navbar /> */}
 
         <WelcomeBanner />
 
