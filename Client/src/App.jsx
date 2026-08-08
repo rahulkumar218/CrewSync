@@ -21,6 +21,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import EmployeeList from "./pages/Employees/EmployeeList";
 import MainLayout from "./layouts/MainLayout";
 import Attendance from "./pages/Attendance/Attendance";
+import LeavePage from "./pages/Leave/LeavePage";
 function App() {
   return (
     <BrowserRouter>
@@ -53,6 +54,15 @@ function App() {
   element={
     <MainLayout>
       <Attendance />
+    </MainLayout>
+  }
+/>
+
+<Route
+  path="/leave"
+  element={
+    <MainLayout>
+      <LeavePage />
     </MainLayout>
   }
 />
