@@ -23,6 +23,8 @@ function Attendance() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("All Status");
     const [showModal, setShowModal] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState("");
+const [selectedAttendanceStatus, setSelectedAttendanceStatus] = useState("Present");
    const monthlyAttendanceData = {
   "August 2026": [
     { day: "Mon", present: 182, late: 12, absent: 6 },
@@ -75,7 +77,7 @@ const monthlyStats = {
   },
 };
 const currentStats = monthlyStats[selectedMonth];
-  const employees = [
+  const [employees, setEmployees] = useState([
     {
       name: "Binita Biswas",
       role: "HR Manager",
@@ -104,7 +106,7 @@ const currentStats = monthlyStats[selectedMonth];
       hours: "--",
       status: "Absent",
     },
-  ];
+  ]);
  const filteredEmployees = employees.filter((employee) => {
   const matchesSearch = employee.name
     .toLowerCase()
@@ -384,21 +386,46 @@ const currentStats = monthlyStats[selectedMonth];
       </div>
 
       <div className="mt-6 space-y-4">
-        <select className="w-full rounded-xl border border-slate-200 px-4 py-3">
+        <select
+  value={selectedEmployee}
+  onChange={(e) => setSelectedEmployee(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 px-4 py-3"
+>
           <option>Select Employee</option>
           {employees.map((employee, index) => (
             <option key={index}>{employee.name}</option>
           ))}
         </select>
 
-        <select className="w-full rounded-xl border border-slate-200 px-4 py-3">
+        <select
+  value={selectedAttendanceStatus}
+  onChange={(e) => setSelectedAttendanceStatus(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 px-4 py-3"
+>
           <option>Present</option>
           <option>Late</option>
           <option>Absent</option>
         </select>
 
         <button
-          onClick={() => setShowModal(false)}
+        onClick={() => {
+  if (!selectedEmployee) return;
+
+  setEmployees((prevEmployees) =>
+    prevEmployees.map((employee) =>
+      employee.name === selectedEmployee
+        ? {
+            ...employee,
+            status: selectedAttendanceStatus,
+          }
+        : employee
+    )
+  );
+
+  setShowModal(false);
+  setSelectedEmployee("");
+  setSelectedAttendanceStatus("Present");
+}}
           className="w-full rounded-xl bg-violet-600 py-3 font-semibold text-white hover:bg-violet-700"
         >
           Save Attendance
