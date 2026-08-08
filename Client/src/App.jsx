@@ -22,6 +22,7 @@ import EmployeeList from "./pages/Employees/EmployeeList";
 import MainLayout from "./layouts/MainLayout";
 import Attendance from "./pages/Attendance/Attendance";
 import LeavePage from "./pages/Leave/LeavePage";
+import PayrollPage from "./pages/Payroll/PayrollPage";
 function App() {
   return (
     <BrowserRouter>
@@ -63,6 +64,15 @@ function App() {
   element={
     <MainLayout>
       <LeavePage />
+    </MainLayout>
+  }
+/>
+
+<Route
+  path="/payroll"
+  element={
+    <MainLayout>
+      <PayrollPage />
     </MainLayout>
   }
 />
