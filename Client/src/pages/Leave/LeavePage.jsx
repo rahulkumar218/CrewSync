@@ -44,6 +44,15 @@ const updateLeaveStatus = (index, status) => {
     )
   );
 };
+const [searchTerm, setSearchTerm] = useState("");
+const [statusFilter, setStatusFilter] = useState("All Status");
+const pendingCount = leaveRequests.filter(
+  (request) => request.status === "Pending"
+).length;
+
+const approvedCount = leaveRequests.filter(
+  (request) => request.status === "Approved"
+).length;
   return (
     <div className="space-y-7">
 
@@ -88,7 +97,7 @@ const updateLeaveStatus = (index, status) => {
             Total Leave Requests
           </p>
           <h2 className="mt-2 text-3xl font-bold text-slate-800">
-            64
+           {leaveRequests.length}
           </h2>
           <p className="mt-2 text-xs text-slate-400">
             This month
@@ -100,7 +109,7 @@ const updateLeaveStatus = (index, status) => {
             Pending Requests
           </p>
           <h2 className="mt-2 text-3xl font-bold text-amber-500">
-            12
+          {pendingCount}
           </h2>
           <p className="mt-2 text-xs text-slate-400">
             Need approval
@@ -112,7 +121,7 @@ const updateLeaveStatus = (index, status) => {
             Approved Leaves
           </p>
           <h2 className="mt-2 text-3xl font-bold text-emerald-500">
-            48
+            {approvedCount}
           </h2>
           <p className="mt-2 text-xs text-slate-400">
             This month
@@ -153,17 +162,22 @@ const updateLeaveStatus = (index, status) => {
           <div className="flex flex-col gap-3 sm:flex-row">
 
             <input
-              type="text"
-              placeholder="Search employee..."
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-violet-500"
-            />
-
-            <select className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-violet-500">
-              <option>All Status</option>
-              <option>Pending</option>
-              <option>Approved</option>
-              <option>Rejected</option>
-            </select>
+  type="text"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  placeholder="Search employee..."
+  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-violet-500"
+/>
+           <select
+  value={statusFilter}
+  onChange={(e) => setStatusFilter(e.target.value)}
+  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-violet-500"
+>
+  <option>All Status</option>
+  <option>Pending</option>
+  <option>Approved</option>
+  <option>Rejected</option>
+</select>
 
           </div>
 
@@ -211,7 +225,16 @@ const updateLeaveStatus = (index, status) => {
 
 
            <tbody>
-  {leaveRequests.map((request, index) => (
+  {leaveRequests
+  .filter((request) =>
+    request.employee.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .filter((request) =>
+    statusFilter === "All Status"
+      ? true
+      : request.status === statusFilter
+  )
+  .map((request, index) => (
     <tr
       key={index}
       className="border-b border-slate-50 transition hover:bg-slate-50/70"
@@ -258,13 +281,18 @@ const updateLeaveStatus = (index, status) => {
       <td className="px-6 py-4">
         {request.status === "Pending" ? (
           <div className="flex gap-2">
-            <button className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100">
-              Approve
-            </button>
-
-            <button className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100">
-              Reject
-            </button>
+            <button
+  onClick={() => updateLeaveStatus(index, "Approved")}
+  className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100"
+>
+  Approve
+</button>
+            <button
+  onClick={() => updateLeaveStatus(index, "Rejected")}
+  className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+>
+  Reject
+</button>
           </div>
         ) : (
           <span className="text-sm text-slate-400">
