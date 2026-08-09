@@ -23,6 +23,9 @@ import MainLayout from "./layouts/MainLayout";
 import Attendance from "./pages/Attendance/Attendance";
 import LeavePage from "./pages/Leave/LeavePage";
 import PayrollPage from "./pages/Payroll/PayrollPage";
+
+import AnalyticsPage from "./pages/Analytics/AnalyticsPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -77,6 +80,14 @@ function App() {
   }
 />
 
+<Route
+  path="/analytics"
+  element={
+    <MainLayout>
+      <AnalyticsPage />
+    </MainLayout>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
