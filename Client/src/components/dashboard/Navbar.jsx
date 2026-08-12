@@ -7,19 +7,65 @@ import {
 import { Moon } from "lucide-react";
 import { useState, useEffect } from "react";
 
+
 function Navbar() {
   const [darkMode, setDarkMode] = useState(() => {
+  const savedSettings = localStorage.getItem("crewsync-settings");
+
+  if (savedSettings) {
+    try {
+      const settings = JSON.parse(savedSettings);
+      return settings.appearance?.theme === "dark";
+    } catch {
+      return false;
+    }
+  }
+
   return localStorage.getItem("theme") === "dark";
 });
 
 useEffect(() => {
+  const root = document.documentElement;
+
   if (darkMode) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("theme", "dark");
+    root.classList.add("dark");
+    root.classList.remove("light");
   } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", "light");
+    root.classList.remove("dark");
+    root.classList.add("light");
   }
+
+  // Navbar aur Settings dono same theme save karenge
+  localStorage.setItem(
+    "theme",
+    darkMode ? "dark" : "light"
+  );
+
+  const savedSettings =
+    localStorage.getItem("crewsync-settings");
+
+  let settings = {};
+
+  if (savedSettings) {
+    try {
+      settings = JSON.parse(savedSettings);
+    } catch {
+      settings = {};
+    }
+  }
+
+  settings = {
+    ...settings,
+    appearance: {
+      ...(settings.appearance || {}),
+      theme: darkMode ? "dark" : "light",
+    },
+  };
+
+  localStorage.setItem(
+    "crewsync-settings",
+    JSON.stringify(settings)
+  );
 }, [darkMode]);
 
   return (

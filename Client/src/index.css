@@ -1,1 +1,109 @@
 @import "tailwindcss";
+/* ================= GLOBAL DARK MODE ================= */
+
+.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Main white surfaces */
+
+.dark .bg-white {
+  background-color: #1e293b;
+}
+
+/* Light backgrounds */
+
+.dark .bg-slate-50 {
+  background-color: #0f172a;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1e293b;
+}
+
+/* Text */
+
+.dark .text-slate-800 {
+  color: #f1f5f9;
+}
+
+.dark .text-slate-700 {
+  color: #e2e8f0;
+}
+
+.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+.dark .text-slate-400 {
+  color: #94a3b8;
+}
+
+/* Borders */
+
+.dark .border-slate-100 {
+  border-color: #334155;
+}
+
+.dark .border-slate-200 {
+  border-color: #475569;
+}
+
+/* Inputs */
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+/* Hover */
+
+.dark .hover\:bg-slate-50:hover {
+  background-color: #334155;
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background-color: #334155;
+}
+
+/* Cards / tables */
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark tr:hover {
+  background-color: rgba(51, 65, 85, 0.45);
+}
+
+/* Smooth theme transition */
+
+html,
+body,
+div,
+section,
+main,
+aside,
+header,
+button,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}

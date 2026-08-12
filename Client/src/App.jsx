@@ -25,6 +25,7 @@ import LeavePage from "./pages/Leave/LeavePage";
 import PayrollPage from "./pages/Payroll/PayrollPage";
 
 import AnalyticsPage from "./pages/Analytics/AnalyticsPage";
+import SettingsPage from "./pages/Settings/SettingsPage";
 
 function App() {
   return (
@@ -88,6 +89,16 @@ function App() {
     </MainLayout>
   }
 />
+
+<Route
+  path="/settings"
+  element={
+    <MainLayout>
+      <SettingsPage />
+    </MainLayout>
+  }
+/>
+
       </Routes>
     </BrowserRouter>
   );
