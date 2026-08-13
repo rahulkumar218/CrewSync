@@ -1,26 +1,43 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const db = require("./config/db");
 
 const app = express();
 
-// Import Routes
-const employeeRoutes = require("./routes/employeeRoutes");
-const authRoutes = require("./routes/authRoutes");
+// ================= MIDDLEWARE =================
+
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true
+    })
+);
 
 app.use(express.json());
 
-// Home Route
+
+// ================= HOME ROUTE =================
+
 app.get("/", (req, res) => {
-    res.send("CrewSync Backend Running 🚀");
+    res.json({
+        message: "CrewSync Backend Running 🚀"
+    });
 });
 
-// Employee Routes
-app.use("/employees", employeeRoutes);
 
-// Auth Routes
+// ================= ROUTES =================
+
+const employeeRoutes = require("./routes/employeeRoutes");
+const authRoutes = require("./routes/authRoutes");
+
+app.use("/employees", employeeRoutes);
 app.use("/auth", authRoutes);
+
+
+// ================= SERVER =================
 
 const PORT = 5000;
 

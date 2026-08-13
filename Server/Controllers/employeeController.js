@@ -54,12 +54,14 @@ const addEmployee = (req, res) => {
         ],
         (err, result) => {
 
-            if (err) {
-                console.error(err);
-                return res.status(500).json({
-                    message: "Database Error"
-                });
-            }
+           if (err) {
+    console.error("ADD EMPLOYEE ERROR:", err);
+
+    return res.status(500).json({
+        message: "Database Error",
+        error: err.sqlMessage
+    });
+}
 
             res.status(201).json({
                 message: "Employee Added Successfully",
