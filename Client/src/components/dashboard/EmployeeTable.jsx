@@ -73,7 +73,7 @@ function EmployeeTable() {
 
               </td>
 
-              <td>{emp.department}</td>
+              <td>{emp.department}</td> 
 
               <td>
 

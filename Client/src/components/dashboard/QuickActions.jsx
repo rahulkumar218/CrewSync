@@ -27,7 +27,7 @@ function QuickActions() {
   // EXPORT EMPLOYEE DATA
   // ==============================
   const handleExportData = () => {
-    const employees = [
+    const employees = [ 
       {
         name: "Binita Biswas",
         email: "binita@crewsync.com",
