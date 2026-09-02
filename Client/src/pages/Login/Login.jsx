@@ -27,14 +27,12 @@ function Login() {
 
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
-          email: email,
-          password: password,
+          email,
+          password,
         }),
       });
 
@@ -47,13 +45,14 @@ function Login() {
         return;
       }
 
-      // JWT Token save
+      // Save JWT token
       localStorage.setItem("token", data.token);
 
-      // User information save
+      // Save user information
       localStorage.setItem("user", JSON.stringify(data.user));
 
       console.log("Login successful");
+      console.log("Token saved:", data.token);
 
       // Dashboard par redirect
       window.location.href = "/dashboard";
@@ -76,27 +75,19 @@ function Login() {
 
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-[#8B5CF6] via-[#6366F1] to-[#2563EB] text-white p-16 flex-col justify-center gap-10">
 
-        {/* Background Blur */}
-
         <div className="absolute -top-24 -left-24 w-72 h-72 bg-white/20 rounded-full blur-3xl"></div>
 
         <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-
-
-        {/* Logo + Text */}
 
         <div className="relative z-10">
 
           <div className="flex items-center gap-3 mb-16">
 
             <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg">
-
               <HiOutlineUserGroup className="text-indigo-600 text-3xl" />
-
             </div>
 
             <div>
-
               <h2 className="text-3xl font-bold">
                 CrewSync
               </h2>
@@ -104,34 +95,25 @@ function Login() {
               <p className="text-blue-100 text-sm">
                 HR Management System
               </p>
-
             </div>
 
           </div>
 
-
           <h1 className="text-6xl font-bold leading-tight">
-
             Sync your team.
-
             <br />
 
             <span className="text-blue-200">
               Simplify HR.
             </span>
-
           </h1>
 
-
           <p className="mt-8 text-xl text-blue-100 max-w-md leading-8">
-
             CrewSync helps you manage your workforce
             efficiently and effortlessly.
-
           </p>
 
         </div>
-
 
         {/* Illustration */}
 
@@ -151,7 +133,6 @@ function Login() {
 
           </div>
 
-
           {/* Attendance Card */}
 
           <div className="absolute right-0 top-20 bg-white rounded-2xl shadow-xl px-5 py-4 z-20">
@@ -166,7 +147,6 @@ function Login() {
 
           </div>
 
-
           {/* Main Illustration */}
 
           <img
@@ -179,13 +159,11 @@ function Login() {
 
       </div>
 
-
       {/* ================= RIGHT SIDE ================= */}
 
       <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-10">
 
         <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-gray-100 p-10">
-
 
           {/* Icon */}
 
@@ -195,51 +173,35 @@ function Login() {
 
           </div>
 
-
           {/* Heading */}
 
           <h2 className="text-4xl font-bold text-gray-900 mt-6">
-
             Welcome Back 👋
-
           </h2>
 
-
           <p className="text-gray-500 mt-3 mb-8">
-
             Sign in to continue to CrewSync
-
           </p>
 
-
-          {/* ERROR MESSAGE */}
+          {/* ERROR */}
 
           {error && (
-
             <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
-
               {error}
-
             </div>
-
           )}
-
 
           {/* LOGIN FORM */}
 
           <form onSubmit={handleLogin}>
-
 
             {/* EMAIL */}
 
             <div className="mb-5">
 
               <label className="block text-sm font-medium text-gray-700 mb-2">
-
                 Email
-
               </label>
-
 
               <input
                 type="email"
@@ -251,17 +213,13 @@ function Login() {
 
             </div>
 
-
             {/* PASSWORD */}
 
             <div className="mb-6">
 
               <label className="block text-sm font-medium text-gray-700 mb-2">
-
                 Password
-
               </label>
-
 
               <div className="relative">
 
@@ -273,27 +231,21 @@ function Login() {
                   className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
-
                 {showPassword ? (
-
                   <FiEyeOff
                     onClick={() => setShowPassword(false)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xl hover:text-indigo-600 transition"
                   />
-
                 ) : (
-
                   <FiEye
                     onClick={() => setShowPassword(true)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xl hover:text-indigo-600 transition"
                   />
-
                 )}
 
               </div>
 
             </div>
-
 
             {/* REMEMBER + FORGOT */}
 
@@ -310,7 +262,6 @@ function Login() {
 
               </label>
 
-
               <button
                 type="button"
                 className="text-sm text-blue-600 hover:text-blue-700"
@@ -319,7 +270,6 @@ function Login() {
               </button>
 
             </div>
-
 
             {/* SIGN IN */}
 
@@ -339,7 +289,6 @@ function Login() {
 
           </form>
 
-
           {/* OR */}
 
           <div className="flex items-center my-6">
@@ -353,7 +302,6 @@ function Login() {
             <div className="flex-1 h-px bg-gray-200"></div>
 
           </div>
-
 
           {/* GOOGLE */}
 
@@ -373,7 +321,6 @@ function Login() {
             </span>
 
           </button>
-
 
           {/* SIGN UP */}
 

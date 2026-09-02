@@ -21,7 +21,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+// ================= API =================
 
+const API_URL = "http://localhost:5000";
+const USER_ID = 1;
+
+// ================= DEFAULT SETTINGS =================
 
 const DEFAULT_SETTINGS = {
   profile: {
@@ -57,10 +62,11 @@ const DEFAULT_SETTINGS = {
   },
 };
 
+// ================= THEME =================
+
 function applyTheme(theme) {
   const html = document.documentElement;
 
-  // Previous theme remove karo
   html.classList.remove("dark");
   html.classList.remove("light");
 
@@ -69,7 +75,6 @@ function applyTheme(theme) {
   } else if (theme === "light") {
     html.classList.add("light");
   } else {
-    // System theme
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)"
     ).matches;
@@ -78,10 +83,19 @@ function applyTheme(theme) {
     html.classList.toggle("light", !prefersDark);
   }
 }
+
+// ================= SETTINGS PAGE =================
+
 function SettingsPage() {
+  const USER_ID = 1;
   const [activeTab, setActiveTab] = useState("Profile");
+
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+
   const [saved, setSaved] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+
   const [profileImage, setProfileImage] = useState(
     "https://i.pravatar.cc/150?img=5"
   );
@@ -93,6 +107,8 @@ function SettingsPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // ================= TABS =================
 
   const tabs = [
     {
@@ -122,54 +138,65 @@ function SettingsPage() {
     },
   ];
 
+  // ================= LOAD SETTINGS =================
+
   useEffect(() => {
-  const savedSettings = localStorage.getItem("crewsync-settings");
-  const savedImage = localStorage.getItem("crewsync-profile-image");
+    const loadSettings = async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/settings/${USER_ID}`
+        );
 
-  let loadedSettings = DEFAULT_SETTINGS;
+        if (!response.ok) {
+          throw new Error("Failed to load settings");
+        }
 
-  if (savedSettings) {
-    try {
-      const parsed = JSON.parse(savedSettings);
+        const data = await response.json();
 
-      loadedSettings = {
-        ...DEFAULT_SETTINGS,
-        ...parsed,
-        profile: {
-          ...DEFAULT_SETTINGS.profile,
-          ...parsed.profile,
-        },
-        notifications: {
-          ...DEFAULT_SETTINGS.notifications,
-          ...parsed.notifications,
-        },
-        security: {
-          ...DEFAULT_SETTINGS.security,
-          ...parsed.security,
-        },
-        appearance: {
-          ...DEFAULT_SETTINGS.appearance,
-          ...parsed.appearance,
-        },
-        company: {
-          ...DEFAULT_SETTINGS.company,
-          ...parsed.company,
-        },
-      };
-    } catch (error) {
-      console.error("Settings load error:", error);
-    }
-  }
+        const loadedSettings = {
+          ...DEFAULT_SETTINGS,
 
-  setSettings(loadedSettings);
+          notifications: {
+            email: Boolean(data.email_notifications),
+            payroll: Boolean(data.payroll_alerts),
+            leave: Boolean(data.leave_requests),
+            birthday: Boolean(data.birthday_reminders),
+            attendance: Boolean(data.attendance_alerts),
+          },
 
-  if (savedImage) {
-    setProfileImage(savedImage);
-  }
+          appearance: {
+            ...DEFAULT_SETTINGS.appearance,
+            theme: data.theme || "light",
+            accent: data.accent_color || "violet",
+          },
+        };
 
-  // Apply saved theme on page load
-  applyTheme(loadedSettings.appearance.theme);
-}, []);
+        setSettings(loadedSettings);
+
+        applyTheme(loadedSettings.appearance.theme);
+
+        const savedImage = localStorage.getItem(
+          "crewsync-profile-image"
+        );
+
+        if (savedImage) {
+          setProfileImage(savedImage);
+        }
+      } catch (error) {
+        console.error("Settings load error:", error);
+
+        setSettings(DEFAULT_SETTINGS);
+
+        applyTheme(DEFAULT_SETTINGS.appearance.theme);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  // ================= PROFILE =================
 
   const updateProfile = (field, value) => {
     setSettings((prev) => ({
@@ -181,6 +208,8 @@ function SettingsPage() {
     }));
   };
 
+  // ================= COMPANY =================
+
   const updateCompany = (field, value) => {
     setSettings((prev) => ({
       ...prev,
@@ -190,6 +219,8 @@ function SettingsPage() {
       },
     }));
   };
+
+  // ================= NOTIFICATIONS =================
 
   const updateNotification = (field) => {
     setSettings((prev) => ({
@@ -201,17 +232,21 @@ function SettingsPage() {
     }));
   };
 
- const updateTheme = (theme) => {
-  setSettings((prev) => ({
-    ...prev,
-    appearance: {
-      ...prev.appearance,
-      theme,
-    },
-  }));
+  // ================= THEME =================
 
-  applyTheme(theme);
-};
+  const updateTheme = (theme) => {
+    setSettings((prev) => ({
+      ...prev,
+      appearance: {
+        ...prev.appearance,
+        theme,
+      },
+    }));
+
+    applyTheme(theme);
+  };
+
+  // ================= ACCENT =================
 
   const updateAccent = (accent) => {
     setSettings((prev) => ({
@@ -223,6 +258,8 @@ function SettingsPage() {
     }));
   };
 
+  // ================= PROFILE IMAGE =================
+
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
 
@@ -233,25 +270,76 @@ function SettingsPage() {
     setProfileImage(imageUrl);
   };
 
-  const handleSave = () => {
-  localStorage.setItem(
-    "crewsync-settings",
-    JSON.stringify(settings)
-  );
+  // ================= SAVE SETTINGS =================
 
-  localStorage.setItem(
-    "crewsync-profile-image",
-    profileImage
-  );
+  const handleSave = async () => {
+    try {
+      const payload = {
+        email_notifications:
+          settings.notifications.email,
 
-  applyTheme(settings.appearance.theme);
+        payroll_alerts:
+          settings.notifications.payroll,
 
-  setSaved(true);
+        leave_requests:
+          settings.notifications.leave,
 
-  setTimeout(() => {
-    setSaved(false);
-  }, 2500);
-};
+        birthday_reminders:
+          settings.notifications.birthday,
+
+        attendance_alerts:
+          settings.notifications.attendance,
+
+        theme:
+          settings.appearance.theme,
+
+        accent_color:
+          settings.appearance.accent,
+      };
+
+      const response = await fetch(
+        `${API_URL}/settings/${USER_ID}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to update settings"
+        );
+      }
+
+      applyTheme(settings.appearance.theme);
+
+      localStorage.setItem(
+        "crewsync-profile-image",
+        profileImage
+      );
+
+      setSaved(true);
+
+      setTimeout(() => {
+        setSaved(false);
+      }, 2500);
+
+      console.log(data.message);
+    } catch (error) {
+      console.error("Save settings error:", error);
+
+      alert("Failed to save settings.");
+    }
+  };
+
+  // ================= RESET =================
 
   const handleReset = () => {
     const confirmReset = window.confirm(
@@ -261,25 +349,43 @@ function SettingsPage() {
     if (!confirmReset) return;
 
     setSettings(DEFAULT_SETTINGS);
-    setProfileImage("https://i.pravatar.cc/150?img=5");
 
-    localStorage.removeItem("crewsync-settings");
-    localStorage.removeItem("crewsync-profile-image");
+    setProfileImage(
+      "https://i.pravatar.cc/150?img=5"
+    );
+
+    localStorage.removeItem(
+      "crewsync-profile-image"
+    );
+
+    applyTheme(
+      DEFAULT_SETTINGS.appearance.theme
+    );
   };
 
+  // ================= PASSWORD =================
+
   const handlePasswordChange = () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (
+      !currentPassword ||
+      !newPassword ||
+      !confirmPassword
+    ) {
       alert("Please fill all password fields.");
       return;
     }
 
     if (newPassword.length < 6) {
-      alert("New password must contain at least 6 characters.");
+      alert(
+        "New password must contain at least 6 characters."
+      );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert("New password and confirm password do not match.");
+      alert(
+        "New password and confirm password do not match."
+      );
       return;
     }
 
@@ -290,6 +396,8 @@ function SettingsPage() {
     alert("Password updated successfully.");
   };
 
+  // ================= THEME ICON =================
+
   const themeIcon = {
     light: Sun,
     dark: Moon,
@@ -298,6 +406,18 @@ function SettingsPage() {
 
   const ActiveThemeIcon =
     themeIcon[settings.appearance.theme] || Sun;
+
+  // ================= LOADING =================
+
+  if (loading) {
+    return (
+      <div className="flex min-h-full items-center justify-center">
+        <div className="text-sm font-semibold text-slate-500">
+          Loading settings...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full space-y-6 pb-10">
@@ -395,8 +515,6 @@ function SettingsPage() {
 
           </div>
 
-          {/* Reset */}
-
           <button
             type="button"
             onClick={handleReset}
@@ -423,15 +541,13 @@ function SettingsPage() {
                 description="Manage your personal information and profile details."
               />
 
-              {/* Profile Card */}
-
               <div className="mb-8 flex flex-col gap-5 rounded-2xl bg-gradient-to-r from-violet-50 to-indigo-50 p-5 sm:flex-row sm:items-center">
 
                 <div className="relative w-fit">
 
                   <img
                     src={profileImage}
-                    alt="Binita Biswas"
+                    alt="Profile"
                     className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-lg"
                   />
 
@@ -524,7 +640,9 @@ function SettingsPage() {
                   title="Email Notifications"
                   description="Receive important CrewSync updates through email."
                   enabled={settings.notifications.email}
-                  onChange={() => updateNotification("email")}
+                  onChange={() =>
+                    updateNotification("email")
+                  }
                 />
 
                 <NotificationItem
@@ -532,7 +650,9 @@ function SettingsPage() {
                   title="Payroll Alerts"
                   description="Get notified when payroll needs your attention."
                   enabled={settings.notifications.payroll}
-                  onChange={() => updateNotification("payroll")}
+                  onChange={() =>
+                    updateNotification("payroll")
+                  }
                 />
 
                 <NotificationItem
@@ -540,7 +660,9 @@ function SettingsPage() {
                   title="Leave Requests"
                   description="Receive notifications for new employee leave requests."
                   enabled={settings.notifications.leave}
-                  onChange={() => updateNotification("leave")}
+                  onChange={() =>
+                    updateNotification("leave")
+                  }
                 />
 
                 <NotificationItem
@@ -548,7 +670,9 @@ function SettingsPage() {
                   title="Birthday Reminders"
                   description="Get reminders about employee birthdays."
                   enabled={settings.notifications.birthday}
-                  onChange={() => updateNotification("birthday")}
+                  onChange={() =>
+                    updateNotification("birthday")
+                  }
                 />
 
                 <NotificationItem
@@ -556,7 +680,9 @@ function SettingsPage() {
                   title="Attendance Alerts"
                   description="Receive alerts for attendance irregularities."
                   enabled={settings.notifications.attendance}
-                  onChange={() => updateNotification("attendance")}
+                  onChange={() =>
+                    updateNotification("attendance")
+                  }
                 />
 
               </div>
@@ -574,8 +700,6 @@ function SettingsPage() {
                 title="Security"
                 description="Protect your CrewSync account and manage security preferences."
               />
-
-              {/* Password */}
 
               <div className="rounded-2xl border border-slate-200 p-5 transition-all duration-300 hover:border-violet-200 hover:shadow-md">
 
@@ -605,7 +729,9 @@ function SettingsPage() {
                     onChange={setCurrentPassword}
                     show={showCurrentPassword}
                     onToggle={() =>
-                      setShowCurrentPassword(!showCurrentPassword)
+                      setShowCurrentPassword(
+                        !showCurrentPassword
+                      )
                     }
                   />
 
@@ -615,7 +741,9 @@ function SettingsPage() {
                     onChange={setNewPassword}
                     show={showNewPassword}
                     onToggle={() =>
-                      setShowNewPassword(!showNewPassword)
+                      setShowNewPassword(
+                        !showNewPassword
+                      )
                     }
                   />
 
@@ -625,7 +753,9 @@ function SettingsPage() {
                     onChange={setConfirmPassword}
                     show={showConfirmPassword}
                     onToggle={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
+                      setShowConfirmPassword(
+                        !showConfirmPassword
+                      )
                     }
                   />
 
@@ -640,8 +770,6 @@ function SettingsPage() {
                 </button>
 
               </div>
-
-              {/* 2FA */}
 
               <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
 
@@ -670,15 +798,14 @@ function SettingsPage() {
                       ...prev,
                       security: {
                         ...prev.security,
-                        twoFactor: !prev.security.twoFactor,
+                        twoFactor:
+                          !prev.security.twoFactor,
                       },
                     }))
                   }
                 />
 
               </div>
-
-              {/* Login Activity */}
 
               <div className="mt-5 rounded-2xl bg-slate-50 p-5">
 
@@ -716,8 +843,6 @@ function SettingsPage() {
                 description="Customize the visual experience of your CrewSync dashboard."
               />
 
-              {/* Theme */}
-
               <div className="mb-8">
 
                 <h3 className="mb-4 font-bold text-slate-800">
@@ -730,8 +855,13 @@ function SettingsPage() {
                     icon={Sun}
                     title="Light"
                     description="Clean and bright interface."
-                    active={settings.appearance.theme === "light"}
-                    onClick={() => updateTheme("light")}
+                    active={
+                      settings.appearance.theme ===
+                      "light"
+                    }
+                    onClick={() =>
+                      updateTheme("light")
+                    }
                     light
                   />
 
@@ -739,8 +869,13 @@ function SettingsPage() {
                     icon={Moon}
                     title="Dark"
                     description="Comfortable for low-light environments."
-                    active={settings.appearance.theme === "dark"}
-                    onClick={() => updateTheme("dark")}
+                    active={
+                      settings.appearance.theme ===
+                      "dark"
+                    }
+                    onClick={() =>
+                      updateTheme("dark")
+                    }
                     dark
                   />
 
@@ -748,15 +883,18 @@ function SettingsPage() {
                     icon={Monitor}
                     title="System"
                     description="Follow your device preference."
-                    active={settings.appearance.theme === "system"}
-                    onClick={() => updateTheme("system")}
+                    active={
+                      settings.appearance.theme ===
+                      "system"
+                    }
+                    onClick={() =>
+                      updateTheme("system")
+                    }
                   />
 
                 </div>
 
               </div>
-
-              {/* Accent */}
 
               <div>
 
@@ -769,29 +907,49 @@ function SettingsPage() {
                   <AccentButton
                     name="violet"
                     color="bg-violet-600"
-                    active={settings.appearance.accent === "violet"}
-                    onClick={() => updateAccent("violet")}
+                    active={
+                      settings.appearance.accent ===
+                      "violet"
+                    }
+                    onClick={() =>
+                      updateAccent("violet")
+                    }
                   />
 
                   <AccentButton
                     name="blue"
                     color="bg-blue-600"
-                    active={settings.appearance.accent === "blue"}
-                    onClick={() => updateAccent("blue")}
+                    active={
+                      settings.appearance.accent ===
+                      "blue"
+                    }
+                    onClick={() =>
+                      updateAccent("blue")
+                    }
                   />
 
                   <AccentButton
                     name="emerald"
                     color="bg-emerald-600"
-                    active={settings.appearance.accent === "emerald"}
-                    onClick={() => updateAccent("emerald")}
+                    active={
+                      settings.appearance.accent ===
+                      "emerald"
+                    }
+                    onClick={() =>
+                      updateAccent("emerald")
+                    }
                   />
 
                   <AccentButton
                     name="rose"
                     color="bg-rose-600"
-                    active={settings.appearance.accent === "rose"}
-                    onClick={() => updateAccent("rose")}
+                    active={
+                      settings.appearance.accent ===
+                      "rose"
+                    }
+                    onClick={() =>
+                      updateAccent("rose")
+                    }
                   />
 
                 </div>
@@ -804,7 +962,9 @@ function SettingsPage() {
 
                 <p className="text-sm font-semibold">
                   Current theme:{" "}
-                  {settings.appearance.theme.charAt(0).toUpperCase() +
+                  {settings.appearance.theme
+                    .charAt(0)
+                    .toUpperCase() +
                     settings.appearance.theme.slice(1)}
                 </p>
 
@@ -833,6 +993,7 @@ function SettingsPage() {
                   </div>
 
                   <div>
+
                     <h3 className="text-lg font-bold text-slate-800">
                       {settings.company.name}
                     </h3>
@@ -840,6 +1001,7 @@ function SettingsPage() {
                     <p className="text-sm text-slate-500">
                       {settings.company.industry}
                     </p>
+
                   </div>
 
                 </div>
@@ -852,7 +1014,10 @@ function SettingsPage() {
                   label="Company Name"
                   value={settings.company.name}
                   onChange={(e) =>
-                    updateCompany("name", e.target.value)
+                    updateCompany(
+                      "name",
+                      e.target.value
+                    )
                   }
                 />
 
@@ -860,7 +1025,10 @@ function SettingsPage() {
                   label="Industry"
                   value={settings.company.industry}
                   onChange={(e) =>
-                    updateCompany("industry", e.target.value)
+                    updateCompany(
+                      "industry",
+                      e.target.value
+                    )
                   }
                 />
 
@@ -869,7 +1037,10 @@ function SettingsPage() {
                   type="email"
                   value={settings.company.email}
                   onChange={(e) =>
-                    updateCompany("email", e.target.value)
+                    updateCompany(
+                      "email",
+                      e.target.value
+                    )
                   }
                 />
 
@@ -877,7 +1048,10 @@ function SettingsPage() {
                   label="Company Phone"
                   value={settings.company.phone}
                   onChange={(e) =>
-                    updateCompany("phone", e.target.value)
+                    updateCompany(
+                      "phone",
+                      e.target.value
+                    )
                   }
                 />
 
@@ -891,7 +1065,10 @@ function SettingsPage() {
                     rows="3"
                     value={settings.company.address}
                     onChange={(e) =>
-                      updateCompany("address", e.target.value)
+                      updateCompany(
+                        "address",
+                        e.target.value
+                      )
                     }
                     className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10"
                   />
@@ -911,7 +1088,7 @@ function SettingsPage() {
 
               <AlertCircle size={15} />
 
-              Changes are saved locally in your browser.
+              Settings are saved to the CrewSync database.
 
             </div>
 
@@ -943,9 +1120,13 @@ function SettingsPage() {
   );
 }
 
-/* ================= COMPONENTS ================= */
+// ================= SECTION HEADER =================
 
-function SectionHeader({ icon: Icon, title, description }) {
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}) {
   return (
     <div className="mb-8 flex items-start gap-4">
 
@@ -968,6 +1149,8 @@ function SectionHeader({ icon: Icon, title, description }) {
     </div>
   );
 }
+
+// ================= INPUT =================
 
 function InputField({
   label,
@@ -999,6 +1182,8 @@ function InputField({
   );
 }
 
+// ================= PASSWORD =================
+
 function PasswordField({
   label,
   value,
@@ -1018,7 +1203,9 @@ function PasswordField({
         <input
           type={show ? "text" : "password"}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) =>
+            onChange(e.target.value)
+          }
           className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10"
         />
 
@@ -1027,7 +1214,11 @@ function PasswordField({
           onClick={onToggle}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-violet-600"
         >
-          {show ? <EyeOff size={18} /> : <Eye size={18} />}
+          {show ? (
+            <EyeOff size={18} />
+          ) : (
+            <Eye size={18} />
+          )}
         </button>
 
       </div>
@@ -1035,6 +1226,8 @@ function PasswordField({
     </div>
   );
 }
+
+// ================= NOTIFICATION ITEM =================
 
 function NotificationItem({
   icon: Icon,
@@ -1066,32 +1259,46 @@ function NotificationItem({
 
       </div>
 
-      <Toggle enabled={enabled} onChange={onChange} />
+      <Toggle
+        enabled={enabled}
+        onChange={onChange}
+      />
 
     </div>
   );
 }
 
-function Toggle({ enabled, onChange }) {
+// ================= TOGGLE =================
+
+function Toggle({
+  enabled,
+  onChange,
+}) {
   return (
     <button
       type="button"
       onClick={onChange}
       aria-pressed={enabled}
       className={`relative h-7 w-12 shrink-0 rounded-full transition-all duration-300 ${
-        enabled ? "bg-violet-600" : "bg-slate-300"
+        enabled
+          ? "bg-violet-600"
+          : "bg-slate-300"
       }`}
     >
 
       <span
         className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${
-          enabled ? "translate-x-6" : "translate-x-1"
+          enabled
+            ? "translate-x-6"
+            : "translate-x-1"
         }`}
       />
 
     </button>
   );
 }
+
+// ================= THEME CARD =================
 
 function ThemeCard({
   icon: Icon,
@@ -1110,7 +1317,11 @@ function ThemeCard({
         active
           ? "border-violet-500 shadow-lg shadow-violet-500/10"
           : "border-slate-200"
-      } ${dark ? "bg-slate-900" : "bg-white"}`}
+      } ${
+        dark
+          ? "bg-slate-900"
+          : "bg-white"
+      }`}
     >
 
       <div
@@ -1136,7 +1347,9 @@ function ThemeCard({
 
       <h3
         className={`font-bold ${
-          dark ? "text-white" : "text-slate-800"
+          dark
+            ? "text-white"
+            : "text-slate-800"
         }`}
       >
         {title}
@@ -1144,7 +1357,9 @@ function ThemeCard({
 
       <p
         className={`mt-1 text-xs ${
-          dark ? "text-slate-400" : "text-slate-500"
+          dark
+            ? "text-slate-400"
+            : "text-slate-500"
         }`}
       >
         {description}
@@ -1160,6 +1375,8 @@ function ThemeCard({
     </button>
   );
 }
+
+// ================= ACCENT BUTTON =================
 
 function AccentButton({
   name,
@@ -1178,10 +1395,14 @@ function AccentButton({
           : "border-transparent"
       }`}
     >
-      <span className={`h-8 w-8 rounded-full ${color}`} />
+      <span
+        className={`h-8 w-8 rounded-full ${color}`}
+      />
     </button>
   );
 }
+
+// ================= WALLET ICON =================
 
 function WalletIcon() {
   return (

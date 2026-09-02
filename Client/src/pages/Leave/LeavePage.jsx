@@ -1,48 +1,90 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+  getLeaves,
+  addLeave,
+  updateLeave,
+} from "../../services/leaveService";
+
+import { getEmployees } from "../../services/employeeService";
 
 function LeavePage() {
     const [showModal, setShowModal] = useState(false);
-    const [leaveEmployee, setLeaveEmployee] = useState("");
+const [leaveEmployee, setLeaveEmployee] = useState("");
 const [leaveType, setLeaveType] = useState("");
 const [leaveFrom, setLeaveFrom] = useState("");
 const [leaveTo, setLeaveTo] = useState("");
 const [leaveReason, setLeaveReason] = useState("");
-const [leaveRequests, setLeaveRequests] = useState([
-  {
-    employee: "Rahul Sharma",
-    role: "Software Engineer",
-    type: "Casual Leave",
-    from: "08 Aug 2026",
-    to: "09 Aug 2026",
-    days: 2,
-    status: "Pending",
-  },
-  {
-    employee: "Priya Singh",
-    role: "UI Designer",
-    type: "Sick Leave",
-    from: "10 Aug 2026",
-    to: "11 Aug 2026",
-    days: 2,
-    status: "Approved",
-  },
-]);
-
+const [leaveRequests, setLeaveRequests] = useState([]);
+const [employeeOptions, setEmployeeOptions] = useState([]);
 const calculateDays = (from, to) => {
   const start = new Date(from);
   const end = new Date(to);
 
   return Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 };
+useEffect(() => {
+  fetchLeaves();
+  fetchEmployeeOptions();
+}, []);
 
-const updateLeaveStatus = (index, status) => {
-  setLeaveRequests((prevRequests) =>
-    prevRequests.map((request, requestIndex) =>
-      requestIndex === index
-        ? { ...request, status }
-        : request
-    )
-  );
+const fetchLeaves = async () => {
+  try {
+    const data = await getLeaves();
+
+    const formattedLeaves = data.map((item) => ({
+      leave_id: item.leave_id,
+      employee_id: item.employee_id,
+      employee: `${item.first_name || ""} ${item.last_name || ""}`.trim(),
+      role: "Employee",
+      type: item.leave_type,
+      from: item.start_date,
+      to: item.end_date,
+      days: calculateDays(item.start_date, item.end_date),
+      reason: item.reason || "",
+      status: item.status,
+    }));
+
+    setLeaveRequests(formattedLeaves);
+  } catch (error) {
+    console.error("Unable to load leaves:", error);
+    alert(error.message || "Unable to load leave requests");
+  }
+};
+
+const fetchEmployeeOptions = async () => {
+  try {
+    const data = await getEmployees();
+
+    const formattedEmployees = data.map((employee) => ({
+      employee_id: employee.employee_id,
+      name: `${employee.first_name || ""} ${employee.last_name || ""}`.trim(),
+    }));
+
+    setEmployeeOptions(formattedEmployees);
+  } catch (error) {
+    console.error("Unable to load employees:", error);
+    alert(error.message || "Unable to load employees");
+  }
+};
+
+const updateLeaveStatus = async (index, status) => {
+  try {
+    const request = leaveRequests[index];
+
+    await updateLeave(request.leave_id, {
+      leave_type: request.type,
+      start_date: request.from,
+      end_date: request.to,
+      reason: request.reason || "",
+      status,
+    });
+
+    await fetchLeaves();
+  } catch (error) {
+    console.error("Unable to update leave:", error);
+    alert(error.message || "Unable to update leave status");
+  }
 };
 const [searchTerm, setSearchTerm] = useState("");
 const [statusFilter, setStatusFilter] = useState("All Status");
@@ -53,7 +95,23 @@ const pendingCount = leaveRequests.filter(
 const approvedCount = leaveRequests.filter(
   (request) => request.status === "Approved"
 ).length;
-  return (
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const onLeaveTodayCount = leaveRequests.filter((request) => {
+  if (request.status !== "Approved") return false;
+
+  const start = new Date(request.from);
+  const end = new Date(request.to);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  return today >= start && today <= end;
+}).length;
+
+return (
     <div className="space-y-7">
 
       {/* Leave Banner */}
@@ -340,10 +398,17 @@ const approvedCount = leaveRequests.filter(
   onChange={(e) => setLeaveEmployee(e.target.value)}
   className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-violet-500"
 >
-            <option>Select Employee</option>
-            <option>Rahul Sharma</option>
-            <option>Priya Singh</option>
-          </select>
+  <option value="">Select Employee</option>
+
+  {employeeOptions.map((employee) => (
+    <option
+      key={employee.employee_id}
+      value={employee.employee_id}
+    >
+      {employee.name}
+    </option>
+  ))}
+</select>
         </div>
 
         <div>
@@ -408,30 +473,38 @@ const approvedCount = leaveRequests.filter(
         </div>
 
         <button
-        onClick={() => {
-  if (!leaveEmployee || !leaveType || !leaveFrom || !leaveTo) return;
+    onClick={async () => {
+  if (
+    !leaveEmployee ||
+    !leaveType ||
+    !leaveFrom ||
+    !leaveTo
+  ) {
+    alert("Please fill all required fields");
+    return;
+  }
 
-  const newRequest = {
-    employee: leaveEmployee,
-    role: "Employee",
-    type: leaveType,
-    from: leaveFrom,
-    to: leaveTo,
-    days: calculateDays(leaveFrom, leaveTo),
-    status: "Pending",
-  };
+  try {
+    await addLeave({
+      employee_id: Number(leaveEmployee),
+      leave_type: leaveType,
+      start_date: leaveFrom,
+      end_date: leaveTo,
+      reason: leaveReason,
+    });
 
-  setLeaveRequests((prevRequests) => [
-    ...prevRequests,
-    newRequest,
-  ]);
+    await fetchLeaves();
 
-  setShowModal(false);
-  setLeaveEmployee("");
-  setLeaveType("");
-  setLeaveFrom("");
-  setLeaveTo("");
-  setLeaveReason("");
+    setShowModal(false);
+    setLeaveEmployee("");
+    setLeaveType("");
+    setLeaveFrom("");
+    setLeaveTo("");
+    setLeaveReason("");
+  } catch (error) {
+    console.error("Unable to add leave:", error);
+    alert(error.message || "Unable to submit leave request");
+  }
 }}
           className="w-full rounded-xl bg-violet-600 py-3 font-semibold text-white transition hover:bg-violet-700"
         >

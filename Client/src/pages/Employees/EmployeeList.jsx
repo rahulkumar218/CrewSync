@@ -1,4 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getEmployees,
+  addEmployee,
+  updateEmployee,
+  deleteEmployee as deleteEmployeeAPI,
+} from "../../services/employeeService";
 import {
   Search,
   Plus,
@@ -17,58 +23,7 @@ import {
 import employeeBanner from "../../assets/images/employee-banner.png";
 
 function EmployeeList() {
-  const [employees, setEmployees] = useState([
-    {
-      id: 1,
-      name: "Binita Biswas",
-      email: "binita@crewsync.com",
-      phone: "+91 98765 43210",
-      department: "HR",
-      role: "HR Manager",
-      status: "Active",
-      joinDate: "12 Jan 2025",
-    },
-    {
-      id: 2,
-      name: "Rahul Sharma",
-      email: "rahul@crewsync.com",
-      phone: "+91 98765 12345",
-      department: "IT",
-      role: "Software Engineer",
-      status: "On Leave",
-      joinDate: "18 Mar 2024",
-    },
-    {
-      id: 3,
-      name: "Priya Sharma",
-      email: "priya@crewsync.com",
-      phone: "+91 98765 67890",
-      department: "Design",
-      role: "UI Designer",
-      status: "Active",
-      joinDate: "05 Jun 2025",
-    },
-    {
-      id: 4,
-      name: "Aman Verma",
-      email: "aman@crewsync.com",
-      phone: "+91 98765 11223",
-      department: "Finance",
-      role: "Financial Analyst",
-      status: "Active",
-      joinDate: "21 Aug 2024",
-    },
-    {
-      id: 5,
-      name: "Sneha Singh",
-      email: "sneha@crewsync.com",
-      phone: "+91 98765 44556",
-      department: "Marketing",
-      role: "Marketing Executive",
-      status: "Inactive",
-      joinDate: "11 Feb 2023",
-    },
-  ]);
+  const [employees, setEmployees] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] =
@@ -78,6 +33,37 @@ function EmployeeList() {
   const [showModal, setShowModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const loadEmployees = async () => {
+  try {
+    const data = await getEmployees();
+
+    const formattedEmployees = data.map((employee) => ({
+      id: employee.employee_id,
+      name: `${employee.first_name || ""} ${employee.last_name || ""}`.trim(),
+      email: employee.email,
+      phone: employee.phone,
+      department: employee.department,
+      role: employee.designation,
+      status: employee.status || "Active",
+      joinDate: employee.hire_date
+        ? new Date(employee.hire_date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+        : "",
+    }));
+
+    setEmployees(formattedEmployees);
+  } catch (error) {
+    console.error("Error loading employees:", error);
+    alert(error.message);
+  }
+};
+
+useEffect(() => {
+  loadEmployees();
+}, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -196,7 +182,7 @@ function EmployeeList() {
   // Add / Update Employee
   // =========================
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -209,49 +195,97 @@ function EmployeeList() {
       return;
     }
 
-    if (editingEmployee) {
-      setEmployees((prevEmployees) =>
-        prevEmployees.map((employee) =>
-          employee.id === editingEmployee.id
-            ? {
-                ...employee,
-                ...formData,
-              }
-            : employee
-        )
-      );
-    } else {
-      const newEmployee = {
-        id: Date.now(),
-        ...formData,
+    try {
+      // Full name ko first name + last name me convert karna
+      const nameParts = formData.name.trim().split(/\s+/);
+
+      const first_name = nameParts[0] || "";
+      const last_name = nameParts.slice(1).join(" ") || "";
+
+      const employeeData = {
+        first_name,
+        last_name,
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        designation: formData.role,
+        salary: 0,
+        hire_date: (() => {
+  const parts = formData.joinDate.trim().split(/\s+/);
+
+  const months = {
+    january: "01",
+    february: "02",
+    march: "03",
+    april: "04",
+    may: "05",
+    june: "06",
+    july: "07",
+    august: "08",
+    september: "09",
+    october: "10",
+    november: "11",
+    december: "12",
+  };
+
+  const day = parts[0].padStart(2, "0");
+  const month = months[parts[1].toLowerCase()];
+  const year = parts[2];
+
+  return `${year}-${month}-${day}`;
+})(),
+        attendance: 0,
+        status: formData.status,
       };
 
-      setEmployees((prevEmployees) => [
-        ...prevEmployees,
-        newEmployee,
-      ]);
-    }
+      // UPDATE
+      if (editingEmployee) {
+        await updateEmployee(editingEmployee.id, employeeData);
 
-    setShowModal(false);
-  };
+        alert("Employee Updated Successfully");
+      }
+
+      // ADD
+      else {
+        await addEmployee(employeeData);
+
+        alert("Employee Added Successfully");
+      }
+
+      // Database se latest employees dobara load
+      await loadEmployees();
+
+      // Modal close
+      setShowModal(false);
+
+    } catch (error) {
+      console.error("Employee Save Error:", error);
+      alert(error.message || "Something went wrong.");
+    }
+};
 
   // =========================
   // Delete Employee
   // =========================
 
-  const deleteEmployee = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this employee?"
-    );
+  const deleteEmployee = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this employee?"
+  );
 
-    if (!confirmDelete) return;
+  if (!confirmDelete) return;
 
-    setEmployees((prevEmployees) =>
-      prevEmployees.filter(
-        (employee) => employee.id !== id
-      )
-    );
-  };
+  try {
+    await deleteEmployeeAPI(id);
+
+    alert("Employee Deleted Successfully");
+
+    await loadEmployees();
+  } catch (error) {
+    console.error("Delete Employee Error:", error);
+    alert(error.message || "Something went wrong.");
+  }
+};
 
   // =========================
   // Status Badge

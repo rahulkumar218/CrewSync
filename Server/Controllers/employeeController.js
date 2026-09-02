@@ -9,6 +9,7 @@ const getEmployees = (req, res) => {
 
         if (err) {
             console.error(err);
+
             return res.status(500).json({
                 message: "Database Error"
             });
@@ -17,6 +18,7 @@ const getEmployees = (req, res) => {
         res.json(result);
     });
 };
+
 
 // ================= ADD EMPLOYEE =================
 const addEmployee = (req, res) => {
@@ -30,15 +32,26 @@ const addEmployee = (req, res) => {
         designation,
         salary,
         hire_date,
-        attendance
+        attendance,
+        status
     } = req.body;
 
     const sql = `
-        INSERT INTO employees
-        (first_name, last_name, email, phone, department, designation, salary, hire_date, attendance)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
+    INSERT INTO employees
+    (
+        first_name,
+        last_name,
+        email,
+        phone,
+        department,
+        designation,
+        salary,
+        hire_date,
+        attendance,
+        status
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
     db.query(
         sql,
         [
@@ -50,18 +63,19 @@ const addEmployee = (req, res) => {
             designation,
             salary,
             hire_date,
-            attendance
+            attendance,
+            status
         ],
         (err, result) => {
 
-           if (err) {
-    console.error("ADD EMPLOYEE ERROR:", err);
+            if (err) {
+                console.error("ADD EMPLOYEE ERROR:", err);
 
-    return res.status(500).json({
-        message: "Database Error",
-        error: err.sqlMessage
-    });
-}
+                return res.status(500).json({
+                    message: "Database Error",
+                    error: err.sqlMessage
+                });
+            }
 
             res.status(201).json({
                 message: "Employee Added Successfully",
@@ -70,6 +84,7 @@ const addEmployee = (req, res) => {
         }
     );
 };
+
 
 // ================= UPDATE EMPLOYEE =================
 const updateEmployee = (req, res) => {
@@ -85,7 +100,8 @@ const updateEmployee = (req, res) => {
         designation,
         salary,
         hire_date,
-        attendance
+        attendance,
+        status
     } = req.body;
 
     const sql = `
@@ -99,7 +115,8 @@ const updateEmployee = (req, res) => {
             designation = ?,
             salary = ?,
             hire_date = ?,
-            attendance = ?
+            attendance = ?,
+            status = ?
         WHERE employee_id = ?
     `;
 
@@ -115,14 +132,17 @@ const updateEmployee = (req, res) => {
             salary,
             hire_date,
             attendance,
+            status,
             id
         ],
         (err, result) => {
 
             if (err) {
-                console.error(err);
+                console.error("UPDATE EMPLOYEE ERROR:", err);
+
                 return res.status(500).json({
-                    message: "Database Error"
+                    message: "Database Error",
+                    error: err.sqlMessage
                 });
             }
 
@@ -139,7 +159,6 @@ const updateEmployee = (req, res) => {
     );
 };
 
-// ================= EXPORT =================
 
 // ================= DELETE EMPLOYEE =================
 const deleteEmployee = (req, res) => {
@@ -151,9 +170,11 @@ const deleteEmployee = (req, res) => {
     db.query(sql, [id], (err, result) => {
 
         if (err) {
-            console.error(err);
+            console.error("DELETE EMPLOYEE ERROR:", err);
+
             return res.status(500).json({
-                message: "Database Error"
+                message: "Database Error",
+                error: err.sqlMessage
             });
         }
 
@@ -169,6 +190,8 @@ const deleteEmployee = (req, res) => {
     });
 };
 
+
+// ================= EXPORT =================
 module.exports = {
     getEmployees,
     addEmployee,

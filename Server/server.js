@@ -27,6 +27,7 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const leaveRoutes = require("./routes/leaveRoutes");
 const payrollRoutes = require("./routes/payrollRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const settingsRoutes = require("./routes/settingsRoutes");
 
 // ================= HOME ROUTE =================
 
@@ -47,6 +48,7 @@ app.use("/leaves", leaveRoutes);
 app.use("/payroll", payrollRoutes);
 
 app.use("/analytics", analyticsRoutes);
+app.use("/settings", settingsRoutes);
 
 // ================= SERVER =================
 

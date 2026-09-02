@@ -8,16 +8,34 @@ const {
   deleteLeave,
 } = require("../Controllers/leaveController");
 
+const verifyToken = require("../middleware/authMiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
+
 const router = express.Router();
 
-router.get("/", getLeaves);
+router.get("/", verifyToken, getLeaves);
 
-router.get("/:id", getLeaveById);
+router.get("/:id", verifyToken, getLeaveById);
 
-router.post("/", addLeave);
+router.post(
+  "/",
+  verifyToken,
+  authorizeRoles("Admin", "HR"),
+  addLeave
+);
 
-router.put("/:id", updateLeave);
+router.put(
+  "/:id",
+  verifyToken,
+  authorizeRoles("Admin", "HR"),
+  updateLeave
+);
 
-router.delete("/:id", deleteLeave);
+router.delete(
+  "/:id",
+  verifyToken,
+  authorizeRoles("Admin"),
+  deleteLeave
+);
 
 module.exports = router;
