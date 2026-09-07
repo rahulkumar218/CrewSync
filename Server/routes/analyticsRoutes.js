@@ -4,13 +4,13 @@ const {
     getAnalyticsSummary,
     getAttendanceOverview,
     getLeaveDistribution,
-    getEmployeeGrowth
+    getEmployeeGrowth,
+    getDepartmentPerformance
 } = require("../Controllers/analyticsController");
 
 const verifyToken = require("../middleware/authMiddleware");
 
 const router = express.Router();
-
 
 // ================= ANALYTICS SUMMARY =================
 
@@ -20,7 +20,6 @@ router.get(
     getAnalyticsSummary
 );
 
-
 // ================= ATTENDANCE OVERVIEW =================
 
 router.get(
@@ -28,7 +27,6 @@ router.get(
     verifyToken,
     getAttendanceOverview
 );
-
 
 // ================= LEAVE DISTRIBUTION =================
 
@@ -38,7 +36,6 @@ router.get(
     getLeaveDistribution
 );
 
-
 // ================= EMPLOYEE GROWTH =================
 
 router.get(
@@ -47,5 +44,12 @@ router.get(
     getEmployeeGrowth
 );
 
+// ================= DEPARTMENT PERFORMANCE =================
+
+router.get(
+    "/department-performance",
+    verifyToken,
+    getDepartmentPerformance
+);
 
 module.exports = router;

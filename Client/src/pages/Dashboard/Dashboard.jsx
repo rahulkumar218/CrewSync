@@ -40,7 +40,29 @@ import AttendanceChart from "../../components/dashboard/AttendanceChart";
 import LeaveChart from "../../components/dashboard/LeaveChart";
 import QuickActions from "../../components/dashboard/QuickActions";
 import Footer from "../../components/common/Footer";
+import { useEffect, useState } from "react";
+import { getDashboardData } from "../../services/dashboardService";
+
 function Dashboard() {
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const data = await getDashboardData();
+
+      console.log("Dashboard API Response:", data);
+
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Unable to load dashboard:", error);
+      alert(error.message || "Unable to load dashboard");
+    }
+  };
+
   return (
     <div className="flex">
 
@@ -55,9 +77,40 @@ function Dashboard() {
         {/* Stats Section */}
         {/* Stats Section */}
 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
-  {stats.map((item) => (
-    <StatCard key={item.id} data={item} />
-  ))}
+  {stats.map((item) => {
+    let value = item.value;
+
+    if (item.title === "Total Employees") {
+      value = dashboardData?.employees?.total ?? item.value;
+    }
+
+    if (item.title === "Present Today") {
+      value = dashboardData?.attendance?.present ?? item.value;
+    }
+
+    if (item.title === "On Leave") {
+  value = dashboardData?.leaves?.total ?? 0;
+}
+
+    if (item.title === "Monthly Payroll") {
+      const amount = dashboardData?.payroll?.totalAmount ?? 0;
+
+      value =
+        amount >= 100000
+          ? `₹${(amount / 100000).toFixed(1)}L`
+          : `₹${amount.toLocaleString("en-IN")}`;
+    }
+
+    return (
+      <StatCard
+        key={item.id}
+        data={{
+          ...item,
+          value,
+        }}
+      />
+    );
+  })}
 </div>
 
 {/* Charts */}

@@ -1,4 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+  getAnalyticsSummary,
+  getAttendanceOverview,
+  getLeaveDistribution,
+  getEmployeeGrowth,
+  getDepartmentPerformance,
+} from "../../services/analyticsService";
+
 import {
   Users,
   CalendarCheck,
@@ -29,37 +38,94 @@ function AnalyticsPage() {
   const [month, setMonth] = useState("August");
   const [department, setDepartment] = useState("All Departments");
 
-  const attendanceData = [
-    { month: "Mar", attendance: 83 },
-    { month: "Apr", attendance: 89 },
-    { month: "May", attendance: 86 },
-    { month: "Jun", attendance: 94 },
-    { month: "Jul", attendance: 92 },
-    { month: "Aug", attendance: 96 },
-  ];
+ const [attendanceData, setAttendanceData] = useState([]);
+const [employeeGrowthData, setEmployeeGrowthData] = useState([]);
+const [leaveData, setLeaveData] = useState([]);
 
-  const departmentData = [
-    { name: "Engineering", performance: 92 },
-    { name: "Design", performance: 88 },
-    { name: "Marketing", performance: 81 },
-    { name: "HR", performance: 86 },
-  ];
+const [totalEmployees, setTotalEmployees] = useState(0);
+const [avgAttendance, setAvgAttendance] = useState(0);
+const [totalLeaves, setTotalLeaves] = useState(0);
+const [departmentData, setDepartmentData] = useState([]);
+const [loading, setLoading] = useState(true);
 
-  const employeeGrowthData = [
-    { month: "Mar", employees: 38 },
-    { month: "Apr", employees: 40 },
-    { month: "May", employees: 42 },
-    { month: "Jun", employees: 44 },
-    { month: "Jul", employees: 46 },
-    { month: "Aug", employees: 48 },
-  ];
 
-  const leaveData = [
-    { name: "Casual Leave", value: 42 },
-    { name: "Sick Leave", value: 28 },
-    { name: "Earned Leave", value: 24 },
-    { name: "Unpaid Leave", value: 6 },
-  ];
+useEffect(() => {
+  fetchAnalytics();
+}, []);
+
+const fetchAnalytics = async () => {
+  try {
+    setLoading(true);
+
+   const [
+  summary,
+  attendance,
+  leaveDistribution,
+  employeeGrowth,
+  departmentPerformance,
+] = await Promise.all([
+  getAnalyticsSummary(),
+  getAttendanceOverview(),
+  getLeaveDistribution(),
+  getEmployeeGrowth(),
+  getDepartmentPerformance(),
+]);
+    setTotalEmployees(Number(summary.totalEmployees) || 0);
+    setAvgAttendance(Number(summary.avgAttendance) || 0);
+    setTotalLeaves(Number(summary.totalLeaves) || 0);
+
+    const formattedAttendance = attendance.map((item) => ({
+      month: new Date(`${item.month}-01`).toLocaleString("en-US", {
+        month: "short",
+      }),
+      attendance: Number(item.attendancePercentage) || 0,
+    }));
+
+    setAttendanceData(formattedAttendance);
+
+    const formattedGrowth = employeeGrowth.map((item) => ({
+      month: new Date(`${item.month}-01`).toLocaleString("en-US", {
+        month: "short",
+      }),
+      employees: Number(item.newEmployees) || 0,
+    }));
+
+    setEmployeeGrowthData(formattedGrowth);
+    const formattedDepartmentPerformance =
+  departmentPerformance.map((item) => ({
+    name: item.name,
+    performance: Number(item.performance) || 0,
+  }));
+
+setDepartmentData(formattedDepartmentPerformance);
+
+   const totalLeaveRecords = leaveDistribution.reduce(
+  (sum, item) => sum + Number(item.total || 0),
+  0
+);
+
+const formattedLeaves = leaveDistribution.map((item) => ({
+  name: item.leave_type,
+  value: Number(item.total) || 0,
+  percentage:
+    totalLeaveRecords > 0
+      ? Math.round(
+          (Number(item.total) / totalLeaveRecords) * 100
+        )
+      : 0,
+}));
+
+setLeaveData(formattedLeaves);
+
+    
+
+  } catch (error) {
+    console.error("Unable to load analytics:", error);
+    alert(error.message || "Unable to load analytics data");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444"];
 
@@ -157,10 +223,9 @@ function AnalyticsPage() {
                 Total Employees
               </p>
 
-              <h2 className="mt-3 text-3xl font-bold text-slate-800">
-                48
-              </h2>
-
+             <h2 className="mt-3 text-3xl font-bold text-slate-800">
+  {loading ? "..." : totalEmployees}
+</h2>
               <div className="mt-2 flex items-center gap-1 text-sm font-medium text-emerald-500">
                 <TrendingUp size={15} />
                 <span>8% from last month</span>
@@ -186,8 +251,8 @@ function AnalyticsPage() {
               </p>
 
               <h2 className="mt-3 text-3xl font-bold text-emerald-500">
-                94%
-              </h2>
+  {loading ? "..." : `${avgAttendance}%`}
+</h2>
 
               <div className="mt-2 flex items-center gap-1 text-sm font-medium text-emerald-500">
                 <TrendingUp size={15} />
@@ -538,7 +603,7 @@ function AnalyticsPage() {
                   </div>
 
                   <span className="text-sm font-bold text-slate-800">
-                    {item.value}%
+                  {item.percentage}%
                   </span>
 
                 </div>

@@ -14,7 +14,8 @@ const getPayroll = (req, res) => {
             p.bonus,
             p.deductions,
             p.\`net-salary\`,
-            p.payment_date
+            p.payment_date,
+            p.status
         FROM payroll p
         JOIN employees e
             ON p.employee_id = e.employee_id
@@ -50,7 +51,8 @@ const getPayrollById = (req, res) => {
             p.bonus,
             p.deductions,
             p.\`net-salary\`,
-            p.payment_date
+            p.payment_date,
+            p.status
         FROM payroll p
         JOIN employees e
             ON p.employee_id = e.employee_id
@@ -79,27 +81,26 @@ const getPayrollById = (req, res) => {
 // ================= ADD PAYROLL =================
 
 const addPayroll = (req, res) => {
-    const {
-        employee_id,
-        salary_month,
-        basic_salary,
-        bonus,
-        deductions,
-        payment_date,
-    } = req.body;
+   const {
+    employee_id,
+    salary_month,
+    basic_salary,
+    bonus,
+    deductions,
+    payment_date,
+     status,
+} = req.body;
 
-    if (
-        !employee_id ||
-        !salary_month ||
-        basic_salary === undefined ||
-        !payment_date
-    ) {
-        return res.status(400).json({
-            message:
-                "employee_id, salary_month, basic_salary and payment_date are required",
-        });
-    }
-
+if (
+    !employee_id ||
+    !salary_month ||
+    basic_salary === undefined
+) {
+    return res.status(400).json({
+        message:
+            "employee_id, salary_month and basic_salary are required",
+    });
+}
     const bonusAmount = Number(bonus) || 0;
     const deductionAmount = Number(deductions) || 0;
     const basicSalary = Number(basic_salary);
@@ -183,22 +184,24 @@ const addPayroll = (req, res) => {
                             bonus,
                             deductions,
                             \`net-salary\`,
-                            payment_date
+                            payment_date,
+                            status
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     `;
 
-                    db.query(
-                        insertSql,
-                        [
-                            employee_id,
-                            salary_month,
-                            basicSalary,
-                            bonusAmount,
-                            deductionAmount,
-                            netSalary,
-                            payment_date,
-                        ],
+                   db.query(
+    insertSql,
+    [
+    employee_id,
+    salary_month,
+    basicSalary,
+    bonusAmount,
+    deductionAmount,
+    netSalary,
+    payment_date || null,
+    status || "Pending",
+],
                         (err, result) => {
                             if (err) {
                                 console.error(
@@ -232,13 +235,13 @@ const updatePayroll = (req, res) => {
     const { id } = req.params;
 
     const {
-        salary_month,
-        basic_salary,
-        bonus,
-        deductions,
-        payment_date,
-    } = req.body;
-
+    salary_month,
+    basic_salary,
+    bonus,
+    deductions,
+    payment_date,
+    status,
+} = req.body;
     if (
         !salary_month ||
         basic_salary === undefined ||
@@ -274,28 +277,30 @@ const updatePayroll = (req, res) => {
     }
 
     const sql = `
-        UPDATE payroll
-        SET
-            salary_month = ?,
-            basic_salary = ?,
-            bonus = ?,
-            deductions = ?,
-            \`net-salary\` = ?,
-            payment_date = ?
-        WHERE payroll_id = ?
-    `;
+    UPDATE payroll
+    SET
+        salary_month = ?,
+        basic_salary = ?,
+        bonus = ?,
+        deductions = ?,
+        \`net-salary\` = ?,
+        payment_date = ?,
+        status = ?
+    WHERE payroll_id = ?
+`;
 
     db.query(
         sql,
         [
-            salary_month,
-            basicSalary,
-            bonusAmount,
-            deductionAmount,
-            netSalary,
-            payment_date,
-            id,
-        ],
+    salary_month,
+    basicSalary,
+    bonusAmount,
+    deductionAmount,
+    netSalary,
+    payment_date || null,
+    status || "Pending",
+    id,
+],
         (err, result) => {
             if (err) {
                 console.error("Update Payroll Error:", err);

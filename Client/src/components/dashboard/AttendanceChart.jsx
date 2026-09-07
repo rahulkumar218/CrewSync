@@ -7,17 +7,39 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-
-const data = [
-  { day: "Mon", present: 220, absent: 18 },
-  { day: "Tue", present: 230, absent: 14 },
-  { day: "Wed", present: 225, absent: 20 },
-  { day: "Thu", present: 240, absent: 12 },
-  { day: "Fri", present: 235, absent: 16 },
-  { day: "Sat", present: 180, absent: 10 },
-];
+import { useEffect, useState } from "react";
+import { getAttendanceOverview } from "../../services/analyticsService";
 
 function AttendanceChart() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const overview = await getAttendanceOverview();
+
+const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const formattedData = days.map((day) => {
+  const item = overview.find(
+    (record) => record.day.substring(0, 3) === day
+  );
+
+  return {
+    day,
+    present: Number(item?.present) || 0,
+    absent: Number(item?.absent) || 0,
+  };
+});
+
+setData(formattedData);
+      } catch (error) {
+        console.error("Error fetching attendance overview:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm h-[380px]">
       <h2 className="text-xl font-semibold mb-6">

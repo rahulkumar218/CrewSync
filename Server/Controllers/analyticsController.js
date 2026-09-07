@@ -72,7 +72,8 @@ const getAttendanceOverview = (req, res) => {
 
     const sql = `
         SELECT
-            DATE_FORMAT(date, '%Y-%m') AS month,
+            DAYNAME(date) AS day,
+            DATE(date) AS attendanceDate,
 
             COUNT(*) AS totalRecords,
 
@@ -98,26 +99,15 @@ const getAttendanceOverview = (req, res) => {
                     THEN 1
                     ELSE 0
                 END
-            ) AS absent,
-
-            ROUND(
-                (
-                    SUM(
-                        CASE
-                            WHEN status = 'Present'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ) / COUNT(*)
-                ) * 100,
-                1
-            ) AS attendancePercentage
+            ) AS absent
 
         FROM attendance
 
-        GROUP BY DATE_FORMAT(date, '%Y-%m')
+        WHERE YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)
 
-        ORDER BY month ASC
+        GROUP BY DATE(date), DAYNAME(date)
+
+        ORDER BY DATE(date) ASC
     `;
 
     db.query(sql, (err, result) => {
@@ -136,8 +126,6 @@ const getAttendanceOverview = (req, res) => {
         res.status(200).json(result);
     });
 };
-
-
 // ================= LEAVE DISTRIBUTION =================
 
 const getLeaveDistribution = (req, res) => {
@@ -207,6 +195,35 @@ const getEmployeeGrowth = (req, res) => {
     });
 };
 
+// ================= DEPARTMENT PERFORMANCE =================
+
+const getDepartmentPerformance = (req, res) => {
+    const sql = `
+        SELECT
+            e.department AS name,
+            ROUND(AVG(p.performance_score), 1) AS performance
+        FROM performance p
+        JOIN employees e
+            ON p.employee_id = e.employee_id
+        WHERE p.review_month = (
+            SELECT MAX(review_month)
+            FROM performance
+        )
+        GROUP BY e.department
+        ORDER BY performance DESC
+    `;
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.error("Department Performance Error:", err);
+            return res.status(500).json({
+                message: "Database Error"
+            });
+        }
+
+        res.status(200).json(result);
+    });
+};
 
 // ================= EXPORT =================
 
@@ -214,5 +231,7 @@ module.exports = {
     getAnalyticsSummary,
     getAttendanceOverview,
     getLeaveDistribution,
-    getEmployeeGrowth
+    getEmployeeGrowth,
+    getDepartmentPerformance
 };
+    

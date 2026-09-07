@@ -1,33 +1,81 @@
 
-import { useState } from "react";
-function PayrollPage() {
-const [payrollData, setPayrollData] = useState([
-  {
-    employee: "Rahul Sharma",
-    role: "Software Engineer",
-    salary: 65000,
-    bonus: 5000,
-    deductions: 2000,
-    status: "Paid",
-  },
-  {
-    employee: "Priya Singh",
-    role: "UI Designer",
-    salary: 55000,
-    bonus: 3000,
-    deductions: 1500,
-    status: "Pending",
-  },
-]);
+import { useEffect, useState } from "react";
 
-const updatePayrollStatus = (index) => {
-  setPayrollData((prevData) =>
-    prevData.map((employee, employeeIndex) =>
-      employeeIndex === index
-        ? { ...employee, status: "Paid" }
-        : employee
-    )
-  );
+import {
+  getPayroll,
+  addPayroll as addPayrollAPI,
+  updatePayroll,
+} from "../../services/payrollService";
+
+import { getEmployees } from "../../services/employeeService";
+function PayrollPage() {
+const [payrollData, setPayrollData] = useState([]);
+const [employeeOptions, setEmployeeOptions] = useState([]);
+
+const updatePayrollStatus = async (employee) => {
+  try {
+    await updatePayroll(employee.payroll_id, {
+      salary_month: employee.salary_month,
+      basic_salary: employee.salary,
+      bonus: employee.bonus,
+      deductions: employee.deductions,
+      payment_date: new Date().toISOString().split("T")[0],
+      status: "Paid",
+    });
+
+    await fetchPayroll();
+  } catch (error) {
+    console.error("Unable to update payroll:", error);
+    alert(error.message || "Unable to update payroll");
+  }
+};
+
+useEffect(() => {
+  fetchPayroll();
+  fetchEmployeeOptions();
+}, []);
+
+const fetchPayroll = async () => {
+  try {
+    const data = await getPayroll();
+
+    console.log("Payroll API Response:", data);
+
+    const formattedPayroll = data.map((item) => ({
+      payroll_id: item.payroll_id,
+      employee_id: item.employee_id,
+      employee: `${item.first_name || ""} ${item.last_name || ""}`.trim(),
+      role: "Employee",
+      salary_month: item.salary_month,
+      salary: Number(item.basic_salary) || 0,
+      bonus: Number(item.bonus) || 0,
+      deductions: Number(item.deductions) || 0,
+      netSalary: Number(item["net-salary"]) || 0,
+      payment_date: item.payment_date,
+      status: item.status || "Pending",
+    }));
+
+    setPayrollData(formattedPayroll);
+  } catch (error) {
+    console.error("Unable to load payroll:", error);
+    alert(error.message || "Unable to load payroll");
+  }
+};
+
+const fetchEmployeeOptions = async () => {
+  try {
+    const data = await getEmployees();
+
+    const formattedEmployees = data.map((employee) => ({
+      employee_id: employee.employee_id,
+      name: `${employee.first_name || ""} ${employee.last_name || ""}`.trim(),
+    }));
+
+    setEmployeeOptions(formattedEmployees);
+  } catch (error) {
+    console.error("Unable to load employees:", error);
+    alert(error.message || "Unable to load employees");
+  }
 };
 
 const totalPayroll = payrollData.reduce(
@@ -61,33 +109,36 @@ const [payrollSalary, setPayrollSalary] = useState("");
 const [payrollBonus, setPayrollBonus] = useState("");
 const [payrollDeductions, setPayrollDeductions] = useState("");
 
-const addPayroll = () => {
+const addPayroll = async () => {
   if (
     !payrollEmployee ||
-    !payrollRole ||
     !payrollSalary
   ) {
+    alert("Please fill all required fields");
     return;
   }
 
-  const newPayroll = {
-    employee: payrollEmployee,
-    role: payrollRole,
-    salary: Number(payrollSalary),
-    bonus: Number(payrollBonus) || 0,
-    deductions: Number(payrollDeductions) || 0,
-    status: "Pending",
-  };
+  try {
+    await addPayrollAPI({
+  employee_id: Number(payrollEmployee),
+  salary_month: new Date().toISOString().slice(0, 7),
+  basic_salary: Number(payrollSalary),
+  bonus: Number(payrollBonus) || 0,
+  deductions: Number(payrollDeductions) || 0,
+});
+    await fetchPayroll();
 
-  setPayrollData((prevData) => [...prevData, newPayroll]);
+    setPayrollEmployee("");
+    setPayrollRole("");
+    setPayrollSalary("");
+    setPayrollBonus("");
+    setPayrollDeductions("");
 
-  setPayrollEmployee("");
-  setPayrollRole("");
-  setPayrollSalary("");
-  setPayrollBonus("");
-  setPayrollDeductions("");
-
-  setShowPayrollModal(false);
+    setShowPayrollModal(false);
+  } catch (error) {
+    console.error("Unable to add payroll:", error);
+    alert(error.message || "Unable to add payroll");
+  }
 };
 
   return (
@@ -320,7 +371,7 @@ const addPayroll = () => {
 
     {employee.status === "Pending" && (
       <button
-        onClick={() => updatePayrollStatus(index)}
+       onClick={() => updatePayrollStatus(employee)}
         className="rounded-lg bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-600 transition hover:bg-violet-100"
       >
         Mark Paid
@@ -369,13 +420,22 @@ const addPayroll = () => {
       {/* Form */}
       <div className="space-y-4">
 
-        <input
-          type="text"
-          value={payrollEmployee}
-          onChange={(e) => setPayrollEmployee(e.target.value)}
-          placeholder="Employee name"
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
-        />
+        <select
+  value={payrollEmployee}
+  onChange={(e) => setPayrollEmployee(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+>
+  <option value="">Select Employee</option>
+
+  {employeeOptions.map((employee) => (
+    <option
+      key={employee.employee_id}
+      value={employee.employee_id}
+    >
+      {employee.name}
+    </option>
+  ))}
+</select>
 
         <input
           type="text"
