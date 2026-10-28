@@ -10,10 +10,7 @@ const app = express();
 
 app.use(
 cors({
-origin: [
-"http://localhost:5173",
-"https://crew-sync-delta.vercel.app"
-],
+origin: [ "http://localhost:5173", "https://crew-sync-delta.vercel.app", "https://crew-sync-mpfyurb7q-crew-sync2.vercel.app" ],
 credentials: true,
 })
 );
