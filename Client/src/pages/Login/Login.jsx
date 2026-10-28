@@ -25,7 +25,7 @@ function Login() {
     try {
       setLoading(true);
 
-      const response = await fetch("https://crewsync-backend-yyq2.onrender.com/settings/profile", {
+      const response = await fetch("https://crewsync-backend-yyq2.onrender.com/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
