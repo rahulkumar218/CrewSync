@@ -215,40 +215,7 @@ function Sidebar() {
         </div>
 
 
-        {/* User Profile */}
-        <div className="group flex cursor-pointer items-center gap-3 rounded-2xl p-2 transition-all duration-300 hover:bg-slate-800/80">
-
-          <div className="relative">
-
-            <img
-              src="https://i.pravatar.cc/100?img=5"
-              alt="Binita Biswas"
-              className="h-11 w-11 rounded-full border-2 border-violet-500 object-cover transition-all duration-300 group-hover:scale-105 group-hover:border-violet-300 group-hover:shadow-lg group-hover:shadow-violet-500/20"
-            />
-
-            {/* Online indicator */}
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-950 bg-emerald-400" />
-
-          </div>
-
-          <div className="min-w-0 flex-1">
-
-            <h4 className="truncate text-sm font-semibold text-white transition-colors duration-300 group-hover:text-violet-300">
-              Binita Biswas
-            </h4>
-
-            <p className="text-xs text-slate-400">
-              HR Manager
-            </p>
-
-          </div>
-
-          <ChevronRight
-            size={16}
-            className="text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-violet-300"
-          />
-
-        </div>
+                {/* User Profile removed - Profile is available in Navbar */}
 
       </div>
 

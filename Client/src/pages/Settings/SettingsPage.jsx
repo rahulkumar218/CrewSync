@@ -143,9 +143,16 @@ function SettingsPage() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await fetch(
-          `${API_URL}/settings/${USER_ID}`
-        );
+        const token = localStorage.getItem("token");
+
+const response = await fetch(
+  `${API_URL}/settings/${USER_ID}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
         if (!response.ok) {
           throw new Error("Failed to load settings");
@@ -153,25 +160,52 @@ function SettingsPage() {
 
         const data = await response.json();
 
-        const loadedSettings = {
-          ...DEFAULT_SETTINGS,
+// ================= LOAD PROFILE =================
 
-          notifications: {
-            email: Boolean(data.email_notifications),
-            payroll: Boolean(data.payroll_alerts),
-            leave: Boolean(data.leave_requests),
-            birthday: Boolean(data.birthday_reminders),
-            attendance: Boolean(data.attendance_alerts),
-          },
+const profileResponse = await fetch(
+  `${API_URL}/settings/profile`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
-          appearance: {
-            ...DEFAULT_SETTINGS.appearance,
-            theme: data.theme || "light",
-            accent: data.accent_color || "violet",
-          },
-        };
+let profileData = {};
 
-        setSettings(loadedSettings);
+if (profileResponse.ok) {
+  profileData = await profileResponse.json();
+} else {
+  console.error("Failed to load profile");
+}
+
+const loadedSettings = {
+  ...DEFAULT_SETTINGS,
+
+  profile: {
+    ...DEFAULT_SETTINGS.profile,
+    name: profileData.full_name || DEFAULT_SETTINGS.profile.name,
+    email: profileData.email || DEFAULT_SETTINGS.profile.email,
+    phone: profileData.phone || DEFAULT_SETTINGS.profile.phone,
+    role: profileData.role || DEFAULT_SETTINGS.profile.role,
+  },
+
+  notifications: {
+    email: Boolean(data.email_notifications),
+    payroll: Boolean(data.payroll_alerts),
+    leave: Boolean(data.leave_requests),
+    birthday: Boolean(data.birthday_reminders),
+    attendance: Boolean(data.attendance_alerts),
+  },
+
+  appearance: {
+    ...DEFAULT_SETTINGS.appearance,
+    theme: data.theme || "light",
+    accent: data.accent_color || "violet",
+  },
+};
+
+setSettings(loadedSettings);
 
         applyTheme(loadedSettings.appearance.theme);
 
@@ -261,84 +295,126 @@ function SettingsPage() {
   // ================= PROFILE IMAGE =================
 
   const handleImageChange = (event) => {
-    const file = event.target.files?.[0];
+  const file = event.target.files?.[0];
 
-    if (!file) return;
+  if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
+  if (!file.type.startsWith("image/")) {
+    alert("Please select a valid image.");
+    return;
+  }
 
-    setProfileImage(imageUrl);
+  if (file.size > 2 * 1024 * 1024) {
+    alert("Image size must be less than 2 MB.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onloadend = () => {
+    if (typeof reader.result === "string") {
+      setProfileImage(reader.result);
+    }
   };
+
+  reader.readAsDataURL(file);
+};
 
   // ================= SAVE SETTINGS =================
 
   const handleSave = async () => {
-    try {
-      const payload = {
-        email_notifications:
-          settings.notifications.email,
+  try {
+    const token = localStorage.getItem("token");
 
-        payroll_alerts:
-          settings.notifications.payroll,
-
-        leave_requests:
-          settings.notifications.leave,
-
-        birthday_reminders:
-          settings.notifications.birthday,
-
-        attendance_alerts:
-          settings.notifications.attendance,
-
-        theme:
-          settings.appearance.theme,
-
-        accent_color:
-          settings.appearance.accent,
-      };
-
-      const response = await fetch(
-        `${API_URL}/settings/${USER_ID}`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to update settings"
-        );
-      }
-
-      applyTheme(settings.appearance.theme);
-
-      localStorage.setItem(
-        "crewsync-profile-image",
-        profileImage
-      );
-
-      setSaved(true);
-
-      setTimeout(() => {
-        setSaved(false);
-      }, 2500);
-
-      console.log(data.message);
-    } catch (error) {
-      console.error("Save settings error:", error);
-
-      alert("Failed to save settings.");
+    if (!token) {
+      throw new Error("Please login again.");
     }
-  };
 
+    // 1. Save Profile
+
+    const profileResponse = await fetch(
+      `${API_URL}/settings/profile`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: settings.profile.name,
+          email: settings.profile.email,
+          phone: settings.profile.phone,
+        }),
+      }
+    );
+
+    const profileData = await profileResponse.json();
+
+    if (!profileResponse.ok) {
+      throw new Error(
+        profileData.message || "Failed to save profile"
+      );
+    }
+    
+
+    // 2. Save Notifications and Appearance
+
+    const payload = {
+      email_notifications: settings.notifications.email,
+      payroll_alerts: settings.notifications.payroll,
+      leave_requests: settings.notifications.leave,
+      birthday_reminders: settings.notifications.birthday,
+      attendance_alerts: settings.notifications.attendance,
+      theme: settings.appearance.theme,
+      accent_color: settings.appearance.accent,
+    };
+
+    const response = await fetch(
+      `${API_URL}/settings/${USER_ID}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to save settings"
+      );
+    }
+
+    // 3. Save Profile Image
+
+    localStorage.setItem(
+      "crewsync-profile-image",
+      profileImage
+    );
+
+    // 4. Apply Theme
+
+    applyTheme(settings.appearance.theme);
+
+    // 5. Show Success
+
+    setSaved(true);
+
+    setTimeout(() => {
+      setSaved(false);
+    }, 2500);
+
+    alert("Profile and settings saved successfully!");
+  } catch (error) {
+    console.error("Save error:", error);
+
+    alert(error.message || "Failed to save changes.");
+  }
+};
   // ================= RESET =================
 
   const handleReset = () => {
@@ -365,37 +441,62 @@ function SettingsPage() {
 
   // ================= PASSWORD =================
 
-  const handlePasswordChange = () => {
-    if (
-      !currentPassword ||
-      !newPassword ||
-      !confirmPassword
-    ) {
-      alert("Please fill all password fields.");
-      return;
+  const handlePasswordChange = async () => {
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    alert("Please fill all password fields.");
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    alert("New password must contain at least 6 characters.");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    alert("New password and confirm password do not match.");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("Please login again.");
     }
 
-    if (newPassword.length < 6) {
-      alert(
-        "New password must contain at least 6 characters."
-      );
-      return;
-    }
+    const response = await fetch(
+      `${API_URL}/settings/password`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      }
+    );
 
-    if (newPassword !== confirmPassword) {
-      alert(
-        "New password and confirm password do not match."
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to update password"
       );
-      return;
     }
 
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
 
-    alert("Password updated successfully.");
-  };
-
+    alert("Password updated successfully!");
+  } catch (error) {
+    console.error("Password change error:", error);
+    alert(error.message || "Failed to update password.");
+  }
+};
   // ================= THEME ICON =================
 
   const themeIcon = {

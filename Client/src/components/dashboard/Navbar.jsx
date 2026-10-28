@@ -36,14 +36,68 @@ function Navbar() {
 
   // ================= STATES =================
   const [search, setSearch] = useState("");
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+const [showNotifications, setShowNotifications] = useState(false);
+const [showMessages, setShowMessages] = useState(false);
+const [showProfile, setShowProfile] = useState(false);
+
+// ================= PROFILE DATA =================
+
+const [profile, setProfile] = useState({
+  name: "Crew Manager",
+  email: "",
+  phone: "",
+  role: "Admin",
+});
+
+const [profileImage, setProfileImage] = useState(
+  localStorage.getItem("crewsync-profile-image") || ""
+);
 
   // ================= REFS =================
   const notificationRef = useRef(null);
   const messageRef = useRef(null);
   const profileRef = useRef(null);
+  // ================= LOAD PROFILE =================
+
+useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const response = await fetch(
+        "http://localhost:5000/settings/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load profile");
+      }
+
+      const data = await response.json();
+
+      setProfile({
+        name: data.full_name || "Crew Manager",
+        email: data.email || "",
+        phone: data.phone || "",
+        role: data.role || "Employee",
+      });
+
+      setProfileImage(
+        localStorage.getItem("crewsync-profile-image") || ""
+      );
+    } catch (error) {
+      console.error("Navbar profile error:", error);
+    }
+  };
+
+  loadProfile();
+}, []);
 
   // ================= THEME =================
   useEffect(() => {
@@ -652,37 +706,37 @@ function Navbar() {
           >
 
             <img
-              src="https://i.pravatar.cc/150?img=5"
-              alt="Binita Biswas"
-              className="
-                w-12 h-12
-                rounded-full
-                object-cover
-                transition-all duration-300
-                hover:scale-105
-                hover:ring-2
-                hover:ring-violet-400
-                hover:ring-offset-2
-              "
-            />
+  src={profileImage || "https://i.pravatar.cc/150?img=5"}
+  alt={profile.name}
+  className="
+    w-12 h-12
+    rounded-full
+    object-cover
+    transition-all duration-300
+    hover:scale-105
+    hover:ring-2
+    hover:ring-violet-400
+    hover:ring-offset-2
+  "
+/>
 
 
             <div className="text-left">
 
               <h3
-                className="
-                  font-semibold
-                  text-slate-800
-                  transition-colors duration-300
-                  hover:text-violet-600
-                "
-              >
-                Binita Biswas
-              </h3>
+  className="
+    font-semibold
+    text-slate-800
+    transition-colors duration-300
+    hover:text-violet-600
+  "
+>
+  {profile.name}
+</h3>
 
-              <p className="text-sm text-gray-500">
-                HR Manager
-              </p>
+<p className="text-sm text-gray-500">
+  {profile.role}
+</p>
 
             </div>
 
