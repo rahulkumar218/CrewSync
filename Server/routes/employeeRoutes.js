@@ -10,8 +10,7 @@ const {
     addEmployee,
     updateEmployee,
     deleteEmployee
-} = require("../controllers/employeeController");
-
+} = require("../Controllers/employeeController");
 
 // View Employees → Any logged-in user
 router.get("/", verifyToken, getEmployees);
