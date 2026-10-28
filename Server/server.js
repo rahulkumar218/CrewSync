@@ -9,11 +9,15 @@ const app = express();
 // ================= CORS =================
 
 app.use(
-    cors({
-        origin: "http://localhost:5173",
-        credentials: true,
-    })
+cors({
+origin: [
+"http://localhost:5173",
+"https://crew-sync-delta.vercel.app"
+],
+credentials: true,
+})
 );
+
 
 // ================= MIDDLEWARE =================
 
