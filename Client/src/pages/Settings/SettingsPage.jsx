@@ -23,7 +23,7 @@ import {
 
 // ================= API =================
 
-const API_URL = "http://localhost:5000";
+const API_URL ="https://crewsync-backend-yyq2.onrender.com/settings/profile";
 const USER_ID = 1;
 
 // ================= DEFAULT SETTINGS =================
