@@ -1,4 +1,4 @@
-const API_URL = "https://crewsync-backend-yyq2.onrender.com/settings/profile";
+const API_URL = "https://crewsync-backend-yyq2.onrender.com";
 const getToken = () => {
   return (
     localStorage.getItem("token") ||

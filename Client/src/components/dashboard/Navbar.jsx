@@ -67,7 +67,7 @@ useEffect(() => {
       if (!token) return;
 
       const response = await fetch(
-        "http://localhost:5000/settings/profile",
+        "https://crewsync-backend-yyq2.onrender.com/settings/profile",
         {
           headers: {
             Authorization: `Bearer ${token}`,
